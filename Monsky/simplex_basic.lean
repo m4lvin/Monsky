@@ -5,7 +5,6 @@ import Mathlib.Order.CompletePartialOrder
 
 local notation "ℝ²" => EuclideanSpace ℝ (Fin 2)
 
-open Classical
 open Finset
 
 
@@ -20,8 +19,8 @@ lemma v₁_val {x y : ℝ} : (v x y) 1 = y := rfl
 
 /-! Definition of an n-dimensional standard simplex. -/
 
-def closed_simplex (n : ℕ)  : Set (Fin n → ℝ) := {α | (∀ i, 0 ≤ α i) ∧ ∑ i, α i = 1}
-def open_simplex   (n : ℕ)  : Set (Fin n → ℝ) := {α | (∀ i, 0 < α i) ∧ ∑ i, α i = 1}
+def closed_simplex (n : ℕ) : Set (Fin n → ℝ) := {α | (∀ i, 0 ≤ α i) ∧ ∑ i, α i = 1}
+def open_simplex (n : ℕ) : Set (Fin n → ℝ) := {α | (∀ i, 0 < α i) ∧ ∑ i, α i = 1}
 
 /-!
   The Fin n → ℝ² in the following definitions represents the vertices of a polygon.
@@ -33,7 +32,7 @@ def open_simplex   (n : ℕ)  : Set (Fin n → ℝ) := {α | (∀ i, 0 < α i) �
 -/
 
 def closed_hull {n : ℕ} (f : Fin n → ℝ²) : Set ℝ² := (fun α ↦ ∑ i, α i • f i) '' closed_simplex n
-def open_hull   {n : ℕ} (f : Fin n → ℝ²) : Set ℝ² := (fun α ↦ ∑ i, α i • f i) '' open_simplex n
+def open_hull {n : ℕ} (f : Fin n → ℝ²) : Set ℝ² := (fun α ↦ ∑ i, α i • f i) '' open_simplex n
 
 
 /- Corner of the standard simplex.-/
@@ -59,7 +58,7 @@ lemma simplex_vertex_image {n : ℕ} {i : Fin n} (f : Fin n → ℝ²) :
 lemma corner_in_closed_hull {n : ℕ} {i : Fin n} {P : Fin n → ℝ²} : P i ∈ closed_hull P := by
   exact ⟨simplex_vertex i, simplex_vertex_in_simplex, by simp⟩
 
-lemma closed_hull_constant {n : ℕ} {P : ℝ²} (hn : n ≠ 0):
+lemma closed_hull_constant {n : ℕ} {P : ℝ²} (hn : n ≠ 0) :
     closed_hull (fun (_ : Fin n) ↦ P) = {P} := by
   ext _
   constructor
@@ -88,7 +87,7 @@ lemma open_sub_closed {n : ℕ} (P : Fin n → ℝ²) : open_hull P ⊆ closed_h
 lemma closed_pol_nonempty {n : ℕ} (hn : 0 < n) (P : Fin n → ℝ²) : Set.Nonempty (closed_hull P) :=
   Set.Nonempty.mono (open_sub_closed P) (open_pol_nonempty hn P)
 
-lemma open_hull_constant {n : ℕ} {P : ℝ²} (hn : n ≠ 0):
+lemma open_hull_constant {n : ℕ} {P : ℝ²} (hn : n ≠ 0) :
     open_hull (fun (_ : Fin n) ↦ P) = {P} :=
   (Set.Nonempty.subset_singleton_iff (open_pol_nonempty (Nat.zero_lt_of_ne_zero hn) _)).mp
       (subset_of_subset_of_eq (open_sub_closed _) (closed_hull_constant hn))
@@ -184,7 +183,7 @@ lemma real_to_fin_2_open {x : ℝ} (h₁ : 0 < x) (h₂ : x < 1)
 
 
 
-
+open Classical in
 /- Vertex set of polygon P₁ lies inside the closed hull of polygon P₂ implies
     the closed hull of P₁ lies inside the closed hull of P₂. -/
 lemma closed_hull_convex {n₁ n₂ : ℕ} {P₁ : Fin n₁ → ℝ²} {P₂ : Fin n₂ → ℝ²}
@@ -201,7 +200,8 @@ lemma closed_hull_convex {n₁ n₂ : ℕ} {P₁ : Fin n₁ → ℝ²} {P₂ : F
 
 
 lemma closed_hull_open_hull_com {n : ℕ} {P : Fin n → ℝ²} {x y : ℝ²}
-  (hx : x ∈ open_hull P) (hy : y ∈ closed_hull P) : (1/(2:ℝ)) • x + (1/(2:ℝ)) • y ∈ open_hull P := by
+    (hx : x ∈ open_hull P) (hy : y ∈ closed_hull P) :
+    (1/(2:ℝ)) • x + (1/(2:ℝ)) • y ∈ open_hull P := by
   have ⟨α, hα, hαx⟩ := hx
   have ⟨β, hβ, hβy⟩ := hy
   use fun i ↦ (1/(2 : ℝ)) * α i + (1/(2:ℝ)) * β i
@@ -212,9 +212,7 @@ lemma closed_hull_open_hull_com {n : ℕ} {P : Fin n → ℝ²} {x y : ℝ²}
     ring
   · simp_rw [add_smul _, sum_add_distrib, mul_smul, ←smul_sum, hαx, hβy]
 
-
-
-/-
+/-!
   We define the boundary of a polygon as the elements in the closed hull but not
   in the open hull.
 -/
@@ -254,9 +252,6 @@ lemma boundary_constant {n : ℕ} {P : ℝ²} :
     rw [hz]
     rw [closed_simplex_zero_empty]
     simp only [univ_eq_empty, sum_empty, Set.image_empty, Set.empty_diff]
-
-
-
 
 lemma open_hull_constant_rev {n : ℕ} {P : ℝ²} {f : Fin n → ℝ²}
     (ho : open_hull f = {P}) : ∀ i, f i = P :=  by

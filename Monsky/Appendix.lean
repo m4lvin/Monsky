@@ -14,7 +14,8 @@ open Polynomial
 Could generalize outside of 2. -/
 lemma mul_del_commute {R : Type} [CommRing R] (p : Polynomial R) (n : ℕ) :
  C 2 * erase n p = erase n (C 2 * p) := by
-  -- Now we use that a polynomial deleting the n-th term aand adding it back in is the same as doing nothing
+  -- Now we use that a polynomial deleting the n-th term
+  -- and adding it back in is the same as doing nothing.
   have one := Polynomial.monomial_add_erase p n
   have two := Polynomial.monomial_add_erase (C 2 * p) n
   have three : erase n (C 2 * p) = (C 2 * p) - (monomial n) ((C 2 * p).coeff n) := by
@@ -34,7 +35,7 @@ lemma erase_degree_leq_n (R : Type) [CommRing R] (p : Polynomial R) (n : ℕ) (h
 (h2 : p.natDegree ≤ n) : (p.erase n).natDegree < n := by
   rw[le_iff_lt_or_eq] at h2
   rcases h2 with (lt|eq)
-  . -- If the degree of p is less than n the nth coefficient is 0
+  · -- If the degree of p is less than n the nth coefficient is 0
     have n_not_in_support : n ∉ p.support := by
       intro n_in_support
       have := eq_natDegree_of_le_mem_support (Nat.le_of_succ_le lt) n_in_support
@@ -48,11 +49,11 @@ lemma erase_degree_leq_n (R : Type) [CommRing R] (p : Polynomial R) (n : ℕ) (h
       exact equal
     have equal2 : erase n p = p := by exact toFinsupp_inj.mp equal1
     rwa[equal2]
-  . -- If the degree is n
+  · -- If the degree is n
     rcases eraseLead_natDegree_lt_or_eraseLead_eq_zero p with (lt2|zero)
-    . rw[← eq]
+    · rw[← eq]
       exact lt2
-    . have def1 : p.eraseLead = p.erase p.natDegree := by rfl
+    · have def1 : p.eraseLead = p.erase p.natDegree := by rfl
       rw[← eq, ← def1, zero, eq]
       exact h1
 
@@ -95,8 +96,8 @@ lemma lower_degree (B : Subring ℝ) (α : ℝ) (m n : ℕ) (H : α ∉ B ∧ α
     rw[monomial_eq_monomial_iff]
     left
     constructor
-    . rfl
-    . rw[coeff_add, coeff_C_ne_zero zero_lt_m, coeff_C_mul, ← two_eq_constant, coeff_C_mul]
+    · rfl
+    · rw[coeff_add, coeff_C_ne_zero zero_lt_m, coeff_C_mul, ← two_eq_constant, coeff_C_mul]
       ring
   -- sum of monomials of degree n-k with as coefficient the k-th coefficient of q over k≤ n.
   -- proving a finite sum of polynomials is a polynomial
@@ -119,20 +120,20 @@ lemma lower_degree (B : Subring ℝ) (α : ℝ) (m n : ℕ) (H : α ∉ B ∧ α
   have equation (x : ℕ) (h : x ≤ n) : α ^ n * (α ^ x)⁻¹ = α^(n-x) := by
     -- exponentiation works as expected
     rw[pow_sub₀]
-    intro h1
-    have zero_in_B : α ∈ B := by
-      rw[h1]
-      exact Subring.zero_mem B
-    tauto
-    exact h
+    · intro h1
+      have zero_in_B : α ∈ B := by
+        rw[h1]
+        exact Subring.zero_mem B
+      tauto
+    · exact h
   have this : α^n * ((aeval α⁻¹) q) = (aeval α) q1 := by
     rw[aeval_eq_sum_range, Finset.mul_sum]
     simp
     rw[n_eq_degree_q, _root_.map_sum]
     simp
     apply Finset.sum_congr
-    . rfl
-    . intro x in_Finset
+    · rfl
+    · intro x in_Finset
       rw[algebramap]
       have x_le_n : x ≤ n := by
         rw[Finset.mem_range] at in_Finset
@@ -191,42 +192,42 @@ lemma lower_degree (B : Subring ℝ) (α : ℝ) (m n : ℕ) (H : α ∉ B ∧ α
     -- degree of sum is ≤ highest degree of summands
     apply natDegree_sum_le_of_forall_le
     intro x x_in_Finset
-    calc
-      ((monomial (n - x)) (q.coeff x)).natDegree ≤ n - x  := by exact natDegree_monomial_le (q.coeff x)
-                                                _ ≤ n      := by exact Nat.sub_le n x
+    calc ((monomial (n - x)) (q.coeff x)).natDegree
+        ≤ n - x  := by exact natDegree_monomial_le (q.coeff x)
+      _ ≤ n      := by exact Nat.sub_le n x
   have deg2 : (q1.erase n).natDegree < n ∨ (q1.erase n).natDegree = 0 := by
     -- erasing the logically axiomatic second possibility as 0 < n
     -- leads to a problem un the cases'of the proof of deg3
     rw[le_iff_lt_or_eq] at deg1
     rcases deg1 with (lt|eq)
-    . left
-      calc
-        (erase n q1).natDegree ≤ q1.natDegree := by exact natDegree_le_natDegree (degree_erase_le q1 n)
-                            _ < n            := by exact lt
-    . rw[← eq]
+    · left
+      calc (erase n q1).natDegree
+          ≤ q1.natDegree := by exact natDegree_le_natDegree (degree_erase_le q1 n)
+        _ < n            := by exact lt
+    · rw[← eq]
       by_cases gt_or_eq : q1.natDegree > 0
-      . left
-        calc
-          (q1.erase q1.natDegree).natDegree ≤ q1.natDegree - 1 := by exact eraseLead_natDegree_le q1
-                                          _ < q1.natDegree     := by exact Nat.sub_one_lt_of_lt gt_or_eq
-      . right
+      · left
+        calc (q1.erase q1.natDegree).natDegree
+            ≤ q1.natDegree - 1 := by exact eraseLead_natDegree_le q1
+          _ < q1.natDegree     := by exact Nat.sub_one_lt_of_lt gt_or_eq
+      · right
         have eq_zero2 : q1.natDegree = 0 := by exact Nat.eq_zero_of_not_pos gt_or_eq
         rw[← Nat.le_zero_eq, ← eq_zero2]
         exact eraseLead_natDegree_le_aux
   have deg3 : (monomial (m-n) 1 * q1.erase n).natDegree < m := by
     rcases deg2 with (lt|eq)
-    . rw[Polynomial.natDegree_mul]
-      nth_rewrite 2 [← tsub_add_cancel_of_le leq]
-      simp
-      exact lt
-      simp
-      exact erase_neq_zero
-    . rw[Polynomial.natDegree_mul]
-      rw[eq]
-      simp
-      exact ⟨Nat.zero_lt_of_ne_zero zero_lt_m, Nat.zero_lt_of_ne_zero zero_lt_n⟩
-      simp
-      exact erase_neq_zero
+    · rw[Polynomial.natDegree_mul]
+      · nth_rewrite 2 [← tsub_add_cancel_of_le leq]
+        simp
+        exact lt
+      · simp
+      · exact erase_neq_zero
+    · rw[Polynomial.natDegree_mul]
+      · rw[eq]
+        simp
+        exact ⟨Nat.zero_lt_of_ne_zero zero_lt_m, Nat.zero_lt_of_ne_zero zero_lt_n⟩
+      · simp
+      · exact erase_neq_zero
   have this10 : ((1 - 2 * v₀):B) * α^m = 2 * (aeval α) (monomial (m-n) 1 * q1.erase n) := by
     rw[aeval_mul]
     nth_rewrite 4 [mul_comm]
@@ -243,14 +244,14 @@ lemma lower_degree (B : Subring ℝ) (α : ℝ) (m n : ℕ) (H : α ∉ B ∧ α
     -- We show this by considering two different cases:
     -- (1-2v₀) = 0 and (1-2v₀) ≠ 0.
     by_cases eq_zero5 : (1 - 2*v₀) = 0
-    . rw[eq_zero5] -- the case (1-2v₀) = 0
+    · rw[eq_zero5] -- the case (1-2v₀) = 0
       simp
-    . rw[natDegree_add_C, natDegree_C_mul] -- the case (1-2v₀) ≠ 0
-      calc
-        p.natDegree = m := by exact m_eq_degree_p
-                  _ ≤ m := by exact Nat.le_refl m
-      simp
-      tauto
+    · rw[natDegree_add_C, natDegree_C_mul] -- the case (1-2v₀) ≠ 0
+      · calc
+          p.natDegree = m := by exact m_eq_degree_p
+                    _ ≤ m := by exact Nat.le_refl m
+      · simp
+        tauto
   have deg5 : (((C (1 - 2*v₀)) * p + (C v₀)).erase m).natDegree < m := by
     exact (erase_degree_leq_n B ((C (1 - 2*v₀)) * p + (C v₀)) m
     (Nat.zero_lt_of_ne_zero zero_lt_m) deg4)
@@ -280,7 +281,7 @@ lemma lower_degree (B : Subring ℝ) (α : ℝ) (m n : ℕ) (H : α ∉ B ∧ α
     rw[← C_mul]
     rw[mul_assoc]
     rw[natDegree_C_mul]
-    exact deg3
+    · exact deg3
     simp
     rw[← m_eq_degree_p]
     simp
@@ -295,8 +296,9 @@ lemma lower_degree (B : Subring ℝ) (α : ℝ) (m n : ℕ) (H : α ∉ B ∧ α
   exact ⟨m', pq, deg6, eq_one_div_of_mul_eq_one_right (_root_.id (Eq.symm this12)), by rfl⟩
 
 /-- Any maximal subring of ℝ not containing 1/2 is a valuation ring. -/
-lemma inclusion_maximal_valuation (B : Subring ℝ) (h1 : (1/2) ∉ B)
-(h2 : ∀(C : Subring ℝ), (B ≤ C) ∧ (1/2) ∉ C → B = C) : ∃(D : ValuationSubring ℝ), D.toSubring = B := by
+lemma inclusion_maximal_valuation (B : Subring ℝ) (h1 : (1 / 2) ∉ B)
+    (h2 : ∀ (C : Subring ℝ), (B ≤ C) ∧ (1 / 2) ∉ C → B = C) :
+    ∃ (D : ValuationSubring ℝ), D.toSubring = B := by
   -- We assume that B is not a valuationring
   by_contra no_vr
   have alpha_existence : ∃(α : ℝ), (α ∉ B ∧ α⁻¹ ∉ B) := by
@@ -439,34 +441,33 @@ lemma inclusion_maximal_valuation (B : Subring ℝ) (h1 : (1/2) ∉ B)
     exact SetLike.coe_mem x
 
   by_cases leq : n ≤ m
+  · rcases (lower_degree B α m n H p q m_eq_degree_p n_eq_degree_q
+    zero_lt_m zero_lt_n p_eval q_eval leq) with ⟨m', pq, deg, eval, deg2⟩
 
-  rcases (lower_degree B α m n H p q m_eq_degree_p n_eq_degree_q
-   zero_lt_m zero_lt_n p_eval q_eval leq) with ⟨m', pq, deg, eval, deg2⟩
+    have main : m' ∈ degree := by
+      exact ⟨pq, deg2.symm, eval⟩
+    have ge : m' ≥ m := by
+      exact WellFounded.min_le wellFounded_lt main
+    rw[lt_iff_not_ge] at deg
+    tauto
 
-  have main : m' ∈ degree := by
-    exact ⟨pq, deg2.symm, eval⟩
-  have ge : m' ≥ m := by
-    exact WellFounded.min_le wellFounded_lt main
-  rw[lt_iff_not_ge] at deg
-  tauto
+  · have leq2 : m ≤ n := by exact Nat.le_of_not_ge leq
+    have H3 : α⁻¹ ∉ B ∧ α⁻¹⁻¹ ∉ B := by
+      simp
+      exact _root_.id (And.symm H)
+    have p_eval2 : (aeval α⁻¹⁻¹) p = 1/2 := by
+      simp
+      rw[← one_div]
+      exact p_eval
 
-  have leq2 : m ≤ n := by exact Nat.le_of_not_ge leq
-  have H3 : α⁻¹ ∉ B ∧ α⁻¹⁻¹ ∉ B := by
-    simp
-    exact _root_.id (And.symm H)
-  have p_eval2 : (aeval α⁻¹⁻¹) p = 1/2 := by
-    simp
-    rw[← one_div]
-    exact p_eval
-
-  rcases (lower_degree B α⁻¹ n m H3 q p n_eq_degree_q m_eq_degree_p
-   zero_lt_n zero_lt_m q_eval p_eval2 leq2) with ⟨m', pq, deg, eval, deg2⟩
-  have main : m' ∈ degree' := by
-    exact ⟨pq, deg2.symm, eval⟩
-  have ge : m' ≥ n := by
-    exact WellFounded.min_le wellFounded_lt main
-  rw[lt_iff_not_ge] at deg
-  tauto
+    rcases (lower_degree B α⁻¹ n m H3 q p n_eq_degree_q m_eq_degree_p
+    zero_lt_n zero_lt_m q_eval p_eval2 leq2) with ⟨m', pq, deg, eval, deg2⟩
+    have main : m' ∈ degree' := by
+      exact ⟨pq, deg2.symm, eval⟩
+    have ge : m' ≥ n := by
+      exact WellFounded.min_le wellFounded_lt main
+    rw[lt_iff_not_ge] at deg
+    tauto
 
 def S := {A : Subring ℝ | (1/2) ∉ A}
 def Z := (Int.castRingHom ℝ).range
@@ -505,14 +506,14 @@ lemma sUnion_is_ub : ∀ c ⊆ S, IsChain (· ≤ ·) c → ∃ ub ∈ S, ∀ z 
   intro c subset chain
   -- we want to treat the empty chain seperately
   by_cases emp_or_not : c ≠ ∅
-  -- Here we have to fiddle around a bit to get our desired upper bound
-  -- we do this by first only treating the carriers and showing that that is a subring
-  -- Here we send the subrings of c to their carriers (the underlying subset of ℝ)
-  let subring_to_set_of_sets : Set (Set ℝ) :=
-    {Rset : Set ℝ | ∃R : Subring ℝ, R ∈ c ∧ Rset = R.carrier}
-  let union_of_sets : Set ℝ := ⋃₀ subring_to_set_of_sets
-  -- Here we show that ub is actually a subring of ℝ
-  let ub : Subring ℝ :=
+  · -- Here we have to fiddle around a bit to get our desired upper bound
+    -- we do this by first only treating the carriers and showing that that is a subring
+    -- Here we send the subrings of c to their carriers (the underlying subset of ℝ)
+    let subring_to_set_of_sets : Set (Set ℝ) :=
+      {Rset : Set ℝ | ∃R : Subring ℝ, R ∈ c ∧ Rset = R.carrier}
+    let union_of_sets : Set ℝ := ⋃₀ subring_to_set_of_sets
+    -- Here we show that ub is actually a subring of ℝ
+    let ub : Subring ℝ :=
     { carrier := union_of_sets,
       zero_mem' := by
         have in_c : ∃(t : Subring ℝ), t ∈ c := by exact Set.nonempty_iff_ne_empty.mpr emp_or_not
@@ -534,7 +535,7 @@ lemma sUnion_is_ub : ∀ c ⊆ S, IsChain (· ≤ ·) c → ∃ ub ∈ S, ∀ z 
         have antisymm : ringa ≤ ringb ∨ ringb ≤ ringa := by
           exact IsChain.total chain H1a H1b
         rcases antisymm with (l|r)
-        . use carb
+        · use carb
           have cara_subset_carb : cara ≤ carb := by
             rwa[H2a, H2b]
           have a_and_b_in_carb : a ∈ ringb ∧ b ∈ ringb := by
@@ -544,7 +545,7 @@ lemma sUnion_is_ub : ∀ c ⊆ S, IsChain (· ≤ ·) c → ∃ ub ∈ S, ∀ z 
           have a_plus_b_in_ringb : a+b ∈ ringb := by
             exact (ringb.add_mem' a_and_b_in_carb.1 a_and_b_in_carb.2)
           exact ⟨hypb', by rwa[H2b]⟩
-        . use cara
+        · use cara
           have carb_subset_cara : carb ≤ cara := by
             rwa[H2b, H2a]
           have a_and_b_in_cara : a ∈ ringa ∧ b ∈ ringa := by
@@ -566,7 +567,7 @@ lemma sUnion_is_ub : ∀ c ⊆ S, IsChain (· ≤ ·) c → ∃ ub ∈ S, ∀ z 
         have antisymm : ringa ≤ ringb ∨ ringb ≤ ringa := by
           exact IsChain.total chain H1a H1b
         rcases antisymm with (l|r)
-        . use carb
+        · use carb
           have cara_subset_carb : cara ≤ carb := by
             rwa[H2a, H2b]
           have a_and_b_in_carb : a ∈ ringb ∧ b ∈ ringb := by
@@ -576,7 +577,7 @@ lemma sUnion_is_ub : ∀ c ⊆ S, IsChain (· ≤ ·) c → ∃ ub ∈ S, ∀ z 
           have a_plus_b_in_ringb : a*b ∈ ringb := by
             exact (ringb.mul_mem' a_and_b_in_carb.1 a_and_b_in_carb.2)
           exact ⟨hypb', by rwa[H2b]⟩
-        . use cara
+        · use cara
           have carb_subset_cara : carb ≤ cara := by
             rwa[H2b, H2a]
           have a_and_b_in_cara : a ∈ ringa ∧ b ∈ ringa := by
@@ -594,32 +595,32 @@ lemma sUnion_is_ub : ∀ c ⊆ S, IsChain (· ≤ ·) c → ∃ ub ∈ S, ∀ z 
         refine Set.mem_sUnion.mpr ?intro.intro.intro.intro.a
         use cara
         constructor
-        . exact hypa'
-        . rw[H2a, Subring.mem_carrier]
+        · exact hypa'
+        · rw[H2a, Subring.mem_carrier]
           rw[H2a, Subring.mem_carrier] at a_in_cara
           exact Subring.neg_mem ringa a_in_cara}
-  -- Now we show that 1/2∉ ub
-  have ub_carrier_non_half : 1/2 ∉ ub.carrier := by
-    intro half_in
-    rw[Set.mem_sUnion] at half_in
-    rcases half_in with ⟨t, h, g⟩
-    rcases h with ⟨ringt, H2, H3⟩
-    have half_not_in_t : 1/2 ∉ t := by exact Eq.mpr_not (congrFun H3 (1 / 2)) (subset H2)
-    tauto
+    -- Now we show that 1/2∉ ub
+    have ub_carrier_non_half : 1/2 ∉ ub.carrier := by
+      intro half_in
+      rw[Set.mem_sUnion] at half_in
+      rcases half_in with ⟨t, h, g⟩
+      rcases h with ⟨ringt, H2, H3⟩
+      have half_not_in_t : 1/2 ∉ t := by exact Eq.mpr_not (congrFun H3 (1 / 2)) (subset H2)
+      tauto
   -- So ub ∈ S
-  have ub_mem_S : ub ∈ S := by
-    exact ub_carrier_non_half
-  use ub -- here we tell lean to use the ub we constructed
-  constructor
-  · exact ub_mem_S
-  · intro z hz x hx
-    exact Subring.mem_carrier.mp (Set.mem_sUnion.mpr ⟨z, ⟨z, hz, by rfl⟩, hx⟩)
-  simp at emp_or_not
-  use Z -- as Z lies in S, S is nonempty
-  constructor
-  . exact Z_in_S
-  . rw[emp_or_not, Set.forall_mem_empty]
-    trivial
+    have ub_mem_S : ub ∈ S := by
+      exact ub_carrier_non_half
+    use ub -- here we tell lean to use the ub we constructed
+    constructor
+    · exact ub_mem_S
+    · intro z hz x hx
+      exact Subring.mem_carrier.mp (Set.mem_sUnion.mpr ⟨z, ⟨z, hz, by rfl⟩, hx⟩)
+  · simp at emp_or_not
+    use Z -- as Z lies in S, S is nonempty
+    constructor
+    · exact Z_in_S
+    · rw[emp_or_not, Set.forall_mem_empty]
+      trivial
 
 -- This lemma shows that there is a valuation ring of ℝ
 -- such that 1/2 does not lie in it
@@ -655,12 +656,12 @@ theorem valuation_on_reals : ∃(Γ₀ : Type) (_ : LinearOrderedCommGroupWithZe
     rw[← not_iff_not] at g
     rwa[gt_iff_lt, ← not_le, g]
 
-lemma odd_valuation (Γ₀ : Type) (_: LinearOrderedCommGroupWithZero Γ₀) (v : Valuation ℝ Γ₀)
-(vhalf : v (1/2)> 1) : ∀ n : ℕ, Odd n → v (1/n) = 1 := by
+lemma odd_valuation (Γ₀ : Type) (_ : LinearOrderedCommGroupWithZero Γ₀) (v : Valuation ℝ Γ₀)
+(vhalf : v (1 / 2) > 1) : ∀ n : ℕ, Odd n → v (1/n) = 1 := by
 have vhalf' : v (2) < 1 := by
   rw [Valuation.map_div, Valuation.map_one] at vhalf
   refine (Valuation.val_lt_one_iff v ?_).mpr ?_
-  . norm_num
+  · norm_num
   · simp_all only [map_inv₀, one_div, gt_iff_lt]
 have vind : ∀ (k : ℕ), k ≠ 0 →  v (2* k) < 1:= by
   intro k
@@ -688,17 +689,17 @@ have vind' : ∀ k : ℕ, k ≠ 0 →  v (2*k + 1) = 1 := by
   have this2 : v (1) = 1 := by
     rw [Valuation.map_one]
   rw [Valuation.map_add_of_distinct_val]
-  specialize vind n hn
-  simp_all only [one_div, map_inv₀, gt_iff_lt, ne_eq, mul_eq_one, OfNat.ofNat_ne_one, false_and,
-    not_false_eq_true, map_mul, map_one, sup_eq_right, ge_iff_le]
-  exact le_of_lt vind
-  rw [this2]
-  specialize vind n hn
-  simp_all only [one_div, map_inv₀, gt_iff_lt, ne_eq, mul_eq_one, OfNat.ofNat_ne_one, false_and, not_false_eq_true,
-    map_one, map_mul]
-  apply Aesop.BuiltinRules.not_intro
-  intro a
-  simp_all only [lt_self_iff_false]
+  · specialize vind n hn
+    simp_all only [one_div, map_inv₀, gt_iff_lt, ne_eq, mul_eq_one, OfNat.ofNat_ne_one, false_and,
+      not_false_eq_true, map_mul, map_one, sup_eq_right, ge_iff_le]
+    exact le_of_lt vind
+  · rw [this2]
+    specialize vind n hn
+    simp_all only [one_div, map_inv₀, gt_iff_lt, ne_eq, mul_eq_one, OfNat.ofNat_ne_one, false_and,
+      not_false_eq_true, map_one, map_mul]
+    apply Aesop.BuiltinRules.not_intro
+    intro a
+    simp_all only [lt_self_iff_false]
 intro n odd
 have odd' : ∃ k, 2 *k + 1 = n := by
   rw [Odd] at odd
@@ -721,7 +722,7 @@ by_cases kpos : k = 0
   rw [this]
   have : v (↑(2 * k + 1)) = 1 := by
     rw [Nat.cast_add, Nat.cast_mul]
-    simp_all only [one_div, map_inv₀, gt_iff_lt, ne_eq, map_mul, not_false_eq_true, imp_self, map_one,
-    Nat.cast_ofNat, Nat.cast_one]
+    simp_all only [one_div, map_inv₀, gt_iff_lt, ne_eq, map_mul, not_false_eq_true, imp_self,
+      map_one, Nat.cast_ofNat, Nat.cast_one]
   rw [this]
   simp

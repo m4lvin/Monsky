@@ -35,8 +35,8 @@ lemma sign_neg' {a : ℝ} (h : Real.sign a = -1) : a < 0 := by
   · rw [Real.sign_eq_zero_iff.mpr h0] at h
     linarith
   · rw [Real.sign_of_pos (lt_of_le_of_ne hnonneg ?_)] at h
-    linarith
-    exact fun a_1 ↦ h0 (id (Eq.symm a_1)) -- very strange
+    · linarith
+    · exact fun a_1 ↦ h0 (id (Eq.symm a_1)) -- very strange
 
 lemma sign_div_pos {a b : ℝ} (hb₀ : b ≠ 0) (hs : Real.sign a = Real.sign b) :
     0 < a / b := by
@@ -75,10 +75,10 @@ lemma real_sign_abs_le {x : ℝ} : |Real.sign x| ≤ 1 := by
 
 /-! ## Other stuff -/
 
-lemma mul_cancel {a b c : ℝ} (h : a ≠ 0) (h2: a * b = a * c) :
+lemma mul_cancel {a b c : ℝ} (h : a ≠ 0) (h2 : a * b = a * c) :
         b = c := by simp_all only [ne_eq, mul_eq_mul_left_iff, or_false]
 
-lemma smul_cancel {a : ℝ} {b c : ℝ²} (h₁ : a ≠ 0) (h₂: a • b = a • c)
+lemma smul_cancel {a : ℝ} {b c : ℝ²} (h₁ : a ≠ 0) (h₂ : a • b = a • c)
     : b = c := by
   refine PiLp.ext ?_
   intro i
@@ -102,7 +102,7 @@ lemma forall_in_swap_special {α β : Type} {P : α → β → Prop} {Q : α →
 
 
 lemma forall_exists_pos_swap {α : Type} [Fintype α] {P : ℝ → α → Prop}
-    (h : ∀ δ a, P δ a → ∀ δ', δ' ≤ δ → P δ' a): (∃ δ > 0, ∀ a, P δ a) ↔ (∀ a, ∃ δ > 0, P δ a) := by
+    (h : ∀ δ a, P δ a → ∀ δ', δ' ≤ δ → P δ' a) : (∃ δ > 0, ∀ a, P δ a) ↔ (∀ a, ∃ δ > 0, P δ a) := by
   constructor
   · exact fun ⟨δ,Qδ,Pδ⟩ a ↦ ⟨δ, Qδ, Pδ a⟩
   · intro ha
@@ -123,7 +123,7 @@ lemma forall_exists_pos_swap {α : Type} [Fintype α] {P : ℝ → α → Prop}
       use 1
       norm_num
 
-def real_interval_δ {x: ℝ} (y : ℝ) (hx : 0 < x) : ∃ δ > 0, ∀ a, |a| ≤ δ → 0 < x + a * y := by
+def real_interval_δ {x : ℝ} (y : ℝ) (hx : 0 < x) : ∃ δ > 0, ∀ a, |a| ≤ δ → 0 < x + a * y := by
   by_cases hy : y = 0
   · exact ⟨1, by norm_num, fun a _ ↦ by rwa [hy,mul_zero,add_zero]⟩
   · use x / (2 * |y|)
@@ -159,11 +159,13 @@ lemma finset_infinite_pigeonhole {α β : Type} [Infinite α] {f : α → β} {B
     cases b
     simp [f_B]
 
-lemma infinite_distinct_el {α : Type} {S : Set α} (hS : Set.Infinite S) (k : α) : ∃ a ∈ S, a ≠ k := by
+lemma infinite_distinct_el {α : Type} {S : Set α} (hS : Set.Infinite S) (k : α) :
+    ∃ a ∈ S, a ≠ k := by
   have ⟨a, haS, ha⟩ :=  Set.Infinite.exists_notMem_finset hS ({k} : Finset α)
   exact ⟨a, haS, List.ne_of_not_mem_cons ha⟩
 
-lemma infinite_imp_two_distinct_el  {α : Type} {S : Set α} (hS : S.Infinite) : ∃ a ∈ S, ∃ b ∈ S, a ≠ b := by
+lemma infinite_imp_two_distinct_el {α : Type} {S : Set α} (hS : S.Infinite) :
+    ∃ a ∈ S, ∃ b ∈ S, a ≠ b := by
   have ⟨a, ha⟩ := Set.Infinite.nonempty hS
   have ⟨b, hb⟩ := infinite_distinct_el hS a
   use a, ha, b, hb.1, hb.2.symm

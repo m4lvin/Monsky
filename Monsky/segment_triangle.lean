@@ -11,7 +11,6 @@ local notation "ℝ²" => EuclideanSpace ℝ (Fin 2)
 local notation "Triangle" => Fin 3 → ℝ²
 local notation "Segment" => Fin 2 → ℝ²
 
-open Classical
 open BigOperators
 open Finset
 
@@ -30,7 +29,7 @@ def det (T : Triangle) : ℝ
 
 def det₂ (x y : ℝ²) : ℝ := x 0 * y 1 - x 1 * y 0
 
-/-- The vector pointing from the start of the segment to the end.-/
+/-- The vector pointing from the start of the segment to the end. -/
 noncomputable def seg_vec (L : Segment) : ℝ² := L 1 - L 0
 
 def sign_seg (L : Segment) (v : ℝ²) : ℝ := det (fun | 0 => L 0 | 1 => L 1 | 2 => v)
@@ -41,7 +40,7 @@ def reverse_segment (L : Segment) : Segment := to_segment (L 1) (L 0)
 
 def colin (u v w : ℝ²) : Prop := u ≠ w ∧ v ∈ open_hull (to_segment u w)
 
-/-- Tside i defines the 'directed' opposite side of T i.-/
+/-- Tside i defines the 'directed' opposite side of T i. -/
 def Tside (T : Triangle) : Fin 3 → Segment := fun
   | 0 => (fun | 0 => T 1 | 1 => T 2)
   | 1 => (fun | 0 => T 2 | 1 => T 0)
@@ -51,10 +50,8 @@ def Tside (T : Triangle) : Fin 3 → Segment := fun
 noncomputable def Tco (T : Triangle) (x : ℝ²) : Fin 3 → ℝ :=
   fun i ↦ (sign_seg (Tside T i) x) / det T
 
-/--
-  This definition is sometimes used, but sometimes isn't.
-  To do: Make this more uniform.
--/
+/-- This definition is sometimes used, but sometimes isn't.
+To do: Make this more uniform. -/
 noncomputable def Oside (T : Triangle) (i : Fin 3) := seg_vec (Tside T i)
 
 /-! Basic lemmas about det₂.-/
@@ -76,7 +73,8 @@ lemma aux_det₂ {L : ℝ²} (hL : L ≠ 0) (hi : ∃ i, L i = 0) : det₂ L (v 
 
 /-! ## Segments -/
 
-lemma open_segment_sub {L₁ L₂ : Segment} (hsub: ∀ i : Fin 2, L₁ i ∈ closed_hull L₂) (hL₁ : L₁ 0 ≠ L₁ 1) :
+lemma open_segment_sub {L₁ L₂ : Segment} (hsub : ∀ i : Fin 2, L₁ i ∈ closed_hull L₂)
+    (hL₁ : L₁ 0 ≠ L₁ 1) :
     open_hull L₁ ⊆ open_hull L₂ := by
   intro x ⟨α,hα,hx⟩
   refine (Set.mem_image (fun α ↦ ∑ i : Fin 2, α i • L₂ i) (open_simplex 2) x).mpr ?_
@@ -100,14 +98,14 @@ lemma open_segment_sub {L₁ L₂ : Segment} (hsub: ∀ i : Fin 2, L₁ i ∈ cl
   have hαx₁ : x₁ ∈ open_simplex 2 := by
     constructor
     have x₁0_pos : x₁ 0 > 0 := by
-      simp [x₁]
+      simp only [Fin.isValue, gt_iff_lt, x₁]
       by_contra h
       simp only [Fin.isValue, not_lt] at h
       have p : α₁ 0 = 0 := by
         by_contra hα₁0
         have p' : α 0 * α₁ 0 + α 1 * α₂ 0 > 0 := by
-          simp only [add_pos_of_pos_of_nonneg,mul_pos (pos 0),lt_of_le_of_ne (pos1 0) (Ne.symm hα₁0),
-          mul_nonneg (pos 1).le (hα₂.1 0)]
+          simp only [add_pos_of_pos_of_nonneg,mul_pos (pos 0),
+            lt_of_le_of_ne (pos1 0) (Ne.symm hα₁0), mul_nonneg (pos 1).le (hα₂.1 0)]
         linarith [p', h]
       have q : α₂ 0 = 0 := by
           by_contra hα₂0
@@ -135,8 +133,8 @@ lemma open_segment_sub {L₁ L₂ : Segment} (hsub: ∀ i : Fin 2, L₁ i ∈ cl
       have t : α₁ 1 = 0 := by
         by_contra hα₁0
         have t' : α 0 * α₁ 1 + α 1 * α₂ 1 > 0 := by
-          simp only [add_pos_of_pos_of_nonneg,mul_pos (pos 0),lt_of_le_of_ne (pos1 1) (Ne.symm hα₁0),
-          mul_nonneg (pos 1).le (hα₂.1 1)]
+          simp only [add_pos_of_pos_of_nonneg,mul_pos (pos 0),
+            lt_of_le_of_ne (pos1 1) (Ne.symm hα₁0), mul_nonneg (pos 1).le (hα₂.1 1)]
         linarith [t', h]
       have u : α₂ 1 = 0 := by
           by_contra hα₂0
@@ -167,8 +165,8 @@ lemma open_segment_sub {L₁ L₂ : Segment} (hsub: ∀ i : Fin 2, L₁ i ∈ cl
       rcases hα₂ with ⟨hα₂₁,hα₂₂⟩
       simp only [Fin.isValue, Fin.sum_univ_two, add_assoc]
       rw [Fin.sum_univ_two] at hα₁₂ hα₂₂ h₂
-      calc
-        α 0 * α₁ 0 + (α 1 * α₂ 0 + (α 0 * α₁ 1 + α 1 * α₂ 1)) = α 0 * (α₁ 0 + α₁ 1) + α 1 * (α₂ 0 + α₂ 1) := by ring
+      calc  α 0 * α₁ 0 + (α 1 * α₂ 0 + (α 0 * α₁ 1 + α 1 * α₂ 1))
+          = α 0 * (α₁ 0 + α₁ 1) + α 1 * (α₂ 0 + α₂ 1) := by ring
         _ = 1 := by simp [hα₁₂,hα₂₂, mul_one, mul_one, h₂]
   use x₁
   constructor
@@ -177,7 +175,7 @@ lemma open_segment_sub {L₁ L₂ : Segment} (hsub: ∀ i : Fin 2, L₁ i ∈ cl
     simp only [Fin.isValue, Fin.sum_univ_two, add_smul, mul_smul, ← add_assoc, x₁]
     exact hx
 
-lemma open_segment_sub' {L₁ L₂ : Segment} (hsub: closed_hull L₁ ⊆ closed_hull L₂)
+lemma open_segment_sub' {L₁ L₂ : Segment} (hsub : closed_hull L₁ ⊆ closed_hull L₂)
     (hL₁ : L₁ 0 ≠ L₁ 1) : open_hull L₁ ⊆ open_hull L₂ :=
   open_segment_sub (fun _ ↦ (hsub corner_in_closed_hull)) hL₁
 
@@ -222,17 +220,17 @@ lemma boundary_seg {L : Segment} (hL : L 0 ≠ L 1)
       have this := smul_cancel (Ne.symm (ne_of_lt (hα.1 (f i)))) h
       fin_cases i <;> (simp [f] at this; rw [this])
 
-lemma boundary_seg' {L : Segment} (hL: L 0 ≠ L 1) : ∀ (i : Fin 2), L i ∈ boundary L := by
+lemma boundary_seg' {L : Segment} (hL : L 0 ≠ L 1) : ∀ (i : Fin 2), L i ∈ boundary L := by
   intro i
   rw [boundary_seg]
-  simp only [coe_image, coe_univ, Set.image_univ, Set.mem_range, exists_apply_eq_apply]
-  apply hL
+  · simp only [coe_image, coe_univ, Set.image_univ, Set.mem_range, exists_apply_eq_apply]
+  · apply hL
 
-lemma boundary_seg_set {L :Segment} (hL : L 0 ≠ L 1) : boundary L = {L 0, L 1} := by
+lemma boundary_seg_set {L : Segment} (hL : L 0 ≠ L 1) : boundary L = {L 0, L 1} := by
   rw [boundary_seg hL]
   aesop
 
-lemma boundary_seg_nonempty {L :Segment} {x : ℝ²} (hx : x ∈ boundary L)
+lemma boundary_seg_nonempty {L : Segment} {x : ℝ²} (hx : x ∈ boundary L)
     : L 0 ≠ L 1 := by
   intro hc
   have hi : ∀ i, L i = L 0 := by
@@ -420,7 +418,6 @@ lemma segment_triv' {L : Segment} : L 0 = L 1 ↔ closed_hull L = {L 0} := by
       exact corner_in_closed_hull
   · exact fun h ↦ ⟨L 0, h⟩
 
-
 lemma seg_nontriv_sub {L₁ L₂ : Segment} (h : closed_hull L₁ ⊆ closed_hull L₂) (hneq : L₁ 0 ≠ L₁ 1)
     : L₂ 0 ≠ L₂ 1 := by
   intro hContra
@@ -428,16 +425,10 @@ lemma seg_nontriv_sub {L₁ L₂ : Segment} (h : closed_hull L₁ ⊆ closed_hul
   apply hneq
   rw [h (L₁ 0) corner_in_closed_hull, h (L₁ 1) corner_in_closed_hull]
 
+/-! ## Triangles -/
 
-
-
-
-/- Triangles -/
-
-/-
-  Given two distinct i,j from Fin 3 this will return the unique element not equal to i and j.
-  If i = j it returns the junk value i.
--/
+/-- Given two distinct i,j from Fin 3 this will return the unique element not equal to i and j.
+If i = j it returns the junk value i. -/
 def last_index : Fin 3 → Fin 3 → Fin 3 := fun
   | 0 => (fun | 0 => 0 | 1 => 2 | 2 => 1)
   | 1 => (fun | 0 => 2 | 1 => 1 | 2 => 0)
@@ -450,9 +441,7 @@ lemma linear_combination_det_last {n : ℕ} {x y : ℝ²} {P : Fin n → ℝ²} 
   simp [det, left_distrib, sum_add_distrib, sum_apply _, mul_sum, ←sum_mul, hα]
   congr <;> (ext; ring)
 
-
-
-/- Lemmas about the barycentric coordinates -/
+/-! Lemmas about the barycentric coordinates -/
 
 lemma Tco_sum {T : Triangle} (hdet : det T ≠ 0) (x : ℝ²) : ∑ i, Tco T x i = 1 := by
   apply mul_cancel hdet
@@ -460,7 +449,7 @@ lemma Tco_sum {T : Triangle} (hdet : det T ≠ 0) (x : ℝ²) : ∑ i, Tco T x i
   ring
 
 lemma Tco_linear {n : ℕ} {T : Triangle} {P : Fin n → ℝ²} {α : Fin n → ℝ}
-    (hα : ∑ i, α i = 1) (k : Fin 3): Tco T (∑ i, (α i) • (P i)) k =  ∑ i, α i * Tco T (P i) k := by
+    (hα : ∑ i, α i = 1) (k : Fin 3) : Tco T (∑ i, (α i) • (P i)) k =  ∑ i, α i * Tco T (P i) k := by
   fin_cases k <;> (
   simp [Tco, sign_seg, linear_combination_det_last hα,sum_div]
   congr; funext _; ring)
@@ -473,7 +462,7 @@ lemma Tco_basis_diag {T : Triangle} (hdet : det T ≠ 0) {i : Fin 3} :
     simp [sign_seg,det, Tside]
   ) <;> ring
 
-lemma Tco_basis_off_diag {T : Triangle} {i j: Fin 3} (hij : i ≠ j) :
+lemma Tco_basis_off_diag {T : Triangle} {i j : Fin 3} (hij : i ≠ j) :
     Tco T (T i) j = 0 := by
   fin_cases i <;> fin_cases j
   all_goals (try tauto)
@@ -481,8 +470,8 @@ lemma Tco_basis_off_diag {T : Triangle} {i j: Fin 3} (hij : i ≠ j) :
     simp [Tco]; left
     simp [sign_seg, det, Tside]; ring)
 
-lemma Tco_sum_val {T : Triangle} (hdet : det T ≠ 0) {α : Fin 3 → ℝ} (hα : ∑i, α i = 1) (k : Fin 3) :
-    Tco T (∑ i, (α i) • (T i)) k = α k := by
+lemma Tco_sum_val {T : Triangle} (hdet : det T ≠ 0) {α : Fin 3 → ℝ} (hα : ∑ i, α i = 1)
+    (k : Fin 3) : Tco T (∑ i, (α i) • (T i)) k = α k := by
   rw [Tco_linear hα, Fin.sum_univ_three]
   fin_cases k <;> simp [Tco_basis_diag hdet, Tco_basis_off_diag]
 
@@ -522,14 +511,14 @@ lemma Tco_line {T : Triangle} {i : Fin 3} (x y : ℝ²) (a : ℝ) :
     Tco T (x  + a • y) i = Tco T x i + a * (det₂ (Oside T i) y) / det T := by
   rw [Tco, sign_seg_line, add_div, ←Tco, ←Oside]
 
+/-! Lemmas about elements in the side of a triangle. -/
 
-/- Lemmas about elements in the side of a triangle. -/
-lemma nondegen_triangle_imp_nondegen_side {T : Triangle} (i : Fin 3) (hdet : det T ≠ 0):
+lemma nondegen_triangle_imp_nondegen_side {T : Triangle} (i : Fin 3) (hdet : det T ≠ 0) :
     Tside T i 0 ≠ Tside T i 1 :=
   fun hS ↦ hdet (by fin_cases i <;> (simp [Tside] at hS; simp [det, hS]) <;> ring)
 
-lemma mem_closed_side {T : Triangle} (hdet : det T ≠ 0) {x : ℝ²} (hx : x ∈ closed_hull T) (i : Fin 3) :
-    Tco T x i = 0 ↔ x ∈ closed_hull (Tside T i) := by
+lemma mem_closed_side {T : Triangle} (hdet : det T ≠ 0) {x : ℝ²} (hx : x ∈ closed_hull T)
+    (i : Fin 3) : Tco T x i = 0 ↔ x ∈ closed_hull (Tside T i) := by
   constructor
   · intro hTco
     use (fun | 0 => Tco T x (i + 1) | 1 => Tco T x (i + 2))
@@ -555,8 +544,8 @@ lemma closed_side_sub' {T : Triangle} {i : Fin 3} :
 lemma closed_side_to_co {T : Triangle} (hdet : det T ≠ 0) {x : ℝ²} {i : Fin 3} (hx : x ∈ closed_hull (Tside T i)) :
     Tco T x i = 0 := (mem_closed_side hdet (closed_side_sub hx) _).2 hx
 
-lemma mem_open_side {T : Triangle} (hdet : det T ≠ 0) {x : ℝ²} (hx : x ∈ closed_hull T) (i : Fin 3) :
-    (Tco T x i = 0 ∧ ∀ j, j ≠ i → 0 < Tco T x j) ↔ x ∈ open_hull (Tside T i) := by
+lemma mem_open_side {T : Triangle} (hdet : det T ≠ 0) {x : ℝ²} (hx : x ∈ closed_hull T)
+    (i : Fin 3) : (Tco T x i = 0 ∧ ∀ j, j ≠ i → 0 < Tco T x j) ↔ x ∈ open_hull (Tside T i) := by
   constructor
   · intro ⟨hTco, hall⟩
     -- This is basically the same proof as the closed version.
@@ -583,8 +572,9 @@ lemma mem_open_side {T : Triangle} (hdet : det T ≠ 0) {x : ℝ²} (hx : x ∈ 
     simp
     fin_cases i <;> fin_cases j <;> tauto
 
-lemma mem_open_side_other_co {T : Triangle} (hdet : det T ≠ 0) {x : ℝ²}  {i : Fin 3} (hxOpen : x ∈ open_hull (Tside T i))
-  : ∀ j, j ≠ i → 0 < Tco T x j := by
+lemma mem_open_side_other_co {T : Triangle} (hdet : det T ≠ 0) {x : ℝ²} {i : Fin 3}
+    (hxOpen : x ∈ open_hull (Tside T i))
+    : ∀ j, j ≠ i → 0 < Tco T x j := by
   rw [←(mem_open_side hdet (closed_side_sub (open_sub_closed _ hxOpen)))] at hxOpen
   exact hxOpen.2
 
@@ -651,10 +641,10 @@ lemma el_in_boundary_imp_side {T : Triangle} {x : ℝ²} (hdet : det T ≠ 0)
   x - a σ y does not (for all a > 0).
 -/
 lemma seg_inter_open {T : Triangle} {x y : ℝ²} {i : Fin 3}
-  (hxT : x ∈ open_hull (Tside T i)) (hdet: det T ≠ 0)
+  (hxT : x ∈ open_hull (Tside T i)) (hdet : det T ≠ 0)
   (hdet₂ : det₂ (seg_vec (Tside T i)) y ≠ 0) :
-  ∃ σ ∈ ({-1,1} : Finset ℝ), (∃ δ > 0, (∀ a : ℝ,
-    (0 < a → a ≤ δ → x + a • σ • y ∈ open_hull T))) ∧ ∀ a : ℝ, 0 < a → x + a • (- σ) • y ∉ closed_hull T := by
+  ∃ σ ∈ ({-1,1} : Finset ℝ), (∃ δ > 0, (∀ a : ℝ, (0 < a → a ≤ δ → x + a • σ • y ∈ open_hull T)))
+    ∧ ∀ a : ℝ, 0 < a → x + a • (- σ) • y ∉ closed_hull T := by
   use Real.sign (det T * det₂ (Oside T i) y)
   constructor
   · rw [real_sign_mul,Oside]
@@ -672,7 +662,9 @@ lemma seg_inter_open {T : Triangle} {x y : ℝ²} {i : Fin 3}
           apply mul_pos hapos
           rw [det₂_mul_last, real_sign_mul, mul_assoc, mul_div_right_comm]
           exact mul_pos (real_sign_div_self hdet) (real_sign_mul_self hdet₂)
-        · have ⟨δ,hδpos, hδa⟩ := real_interval_δ (det₂ (Oside T j) ((det T * det₂ (Oside T i) y).sign • y) / det T) (mem_open_side_other_co hdet hxT j  hij)
+        · have ⟨δ,hδpos, hδa⟩ :=
+            real_interval_δ (det₂ (Oside T j) ((det T * det₂ (Oside T i) y).sign • y) / det T)
+              (mem_open_side_other_co hdet hxT j  hij)
           use δ, hδpos
           intro a ⟨hapos,haup⟩
           convert hδa a (by rwa [abs_of_pos hapos]) using 1
@@ -686,7 +678,8 @@ lemma seg_inter_open {T : Triangle} {x y : ℝ²} {i : Fin 3}
       revert hacl
       simp
       rw [closed_side_to_co hdet (open_sub_closed _ hxT), zero_add,←neg_smul, det₂_mul_last,
-          ←mul_assoc, ←neg_mul_eq_mul_neg, ←neg_mul_eq_neg_mul, neg_div, neg_neg_iff_pos, mul_assoc,  mul_div_assoc]
+          ←mul_assoc, ←neg_mul_eq_mul_neg, ←neg_mul_eq_neg_mul, neg_div, neg_neg_iff_pos,
+          mul_assoc,  mul_div_assoc]
       apply mul_pos hapos
       rw [real_sign_mul, mul_assoc, mul_div_right_comm]
       exact mul_pos (real_sign_div_self hdet) (real_sign_mul_self hdet₂)
@@ -730,11 +723,10 @@ lemma seg_sub_side {T : Triangle} {L : Segment} {x : ℝ²} {i : Fin 3} (hdet : 
       intro hij
       rw [←hij, hTyi y hy] at hj
       exact (lt_self_iff_false 0).mp hj
-    have hxCoj : 0 < Tco T x j := by
-      exact mem_open_side_other_co hdet hxT j hij.symm
-    have hxCoij : 0 < Tco T x j - Tco T y j := by
-      linarith
-    let α : Fin 2 → ℝ := fun | 0 => ((- Tco T y j)/ (Tco T x j - Tco T y j)) | 1 => (Tco T x j/ (Tco T x j - Tco T y j))
+    have hxCoj : 0 < Tco T x j := mem_open_side_other_co hdet hxT j hij.symm
+    have hxCoij : 0 < Tco T x j - Tco T y j := by linarith
+    let α : Fin 2 → ℝ := fun | 0 => ((- Tco T y j)/ (Tco T x j - Tco T y j))
+                             | 1 => (Tco T x j/ (Tco T x j - Tco T y j))
     have hαSimp : α ∈ open_simplex 2 := by
       constructor
       · intro k
@@ -748,7 +740,8 @@ lemma seg_sub_side {T : Triangle} {L : Segment} {x : ℝ²} {i : Fin 3} (hdet : 
     let L' : Segment := fun | 0 => x | 1 => y
     let z := ∑ k, α k • L' k
     have hiz : Tco T z i = 0 := by
-      simp_rw [z, Tco_linear hαSimp.2, Fin.sum_univ_two, L', hTyi x (open_sub_closed _ hxL), hTyi y hy]
+      simp_rw [z, Tco_linear hαSimp.2, Fin.sum_univ_two, L',
+        hTyi x (open_sub_closed _ hxL), hTyi y hy]
       linarith
     have hjz : Tco T z j = 0 := by
       simp_rw [z, Tco_linear hαSimp.2, Fin.sum_univ_two, L', α]
@@ -790,9 +783,9 @@ lemma segment_in_boundary_imp_in_side {T : Triangle} {L : Segment} (hdet : det T
         intro j hji
         have h₁ := haux j δ  hji ?_
         have h₂ := haux j (-δ) hji ?_
-        rw [←(div_left_inj' hdet), zero_div]
-        rw [mul_div_assoc] at h₁ h₂
-        linarith [nonneg_of_mul_nonneg_right h₁ hδ, nonpos_of_mul_nonneg_right h₂ (neg_neg_iff_pos.mpr hδ)]
+        · rw [←(div_left_inj' hdet), zero_div]
+          rw [mul_div_assoc] at h₁ h₂
+          linarith [nonneg_of_mul_nonneg_right h₁ hδ, nonpos_of_mul_nonneg_right h₂ (neg_neg_iff_pos.mpr hδ)]
         all_goals simp only [abs_neg, abs_of_pos hδ, le_refl]
       have hcontra :  T i = T i + δ • seg_vec L := by
         let j : Fin 3 := ⟨(i + 1)%3, by omega⟩
@@ -802,8 +795,10 @@ lemma segment_in_boundary_imp_in_side {T : Triangle} {L : Segment} (hdet : det T
         have hjk : j ≠ k := by fin_cases i <;> simp [j, k]
         convert (two_co_zero_imp_corner hdet hjk ?_ ?_).symm
         · fin_cases i <;> simp [j,k,last_index]
-        · rw [Tco_line, Tco_basis_off_diag hij, Oside, haux2 j hij.symm, zero_add, mul_zero, zero_div]
-        · rw [Tco_line, Tco_basis_off_diag hik, Oside, haux2 k hik.symm, zero_add, mul_zero, zero_div]
+        · rw [Tco_line, Tco_basis_off_diag hij, Oside, haux2 j hij.symm, mul_zero, zero_div,
+            add_zero]
+        · rw [Tco_line, Tco_basis_off_diag hik, Oside, haux2 k hik.symm, zero_add, mul_zero,
+            zero_div]
       apply hLTriv
       rw [←seg_vec_zero_iff]
       rw [left_eq_add, smul_eq_zero] at hcontra
@@ -811,12 +806,11 @@ lemma segment_in_boundary_imp_in_side {T : Triangle} {L : Segment} (hdet : det T
       · linarith
       · assumption
     have ⟨i, hi⟩ := el_in_boundary_imp_side hdet hxBoundary ?_
-    refine ⟨i,seg_sub_side hdet hx hi ?_ hall⟩
-    · ext y; simp
+    · refine ⟨i,seg_sub_side hdet hx hi ?_ hall⟩
+      ext y; simp
       intro hyopen hyclosed
       refine (boundary_not_in_open (hL hyclosed)) hyopen
     · exact fun i => ne_of_mem_of_not_mem hx (hall i)
-
 
 lemma closed_triangle_is_closed_dir {T : Triangle} (hdet : det T ≠ 0) {x y : ℝ²}
     (h : Set.Infinite {n : ℕ | x + (1 / (n : ℝ)) • y ∈ closed_hull T}) : x ∈ closed_hull T := by
@@ -843,11 +837,11 @@ lemma closed_triangle_is_closed_dir {T : Triangle} (hdet : det T ≠ 0) {x y : �
   have ⟨n',hn',hnn'⟩ := hB n
   dsimp at hn'
   rw [closed_triangle_iff] at hn'
-  specialize hn' i
-  rw [Tco_line] at hn'
-  rw [←lt_self_iff_false (0:ℝ)]
-  -- Annoying algebra
-  calc
+  · specialize hn' i
+    rw [Tco_line] at hn'
+    rw [←lt_self_iff_false (0:ℝ)]
+    -- Annoying algebra
+    calc
     0 ≤ Tco T x i + 1 / ↑n' * (det₂ (Oside T i) y / det T)    := by convert hn' using 2; ring
     _ ≤ Tco T x i + |1 / ↑n' * (det₂ (Oside T i) y / det T)|  := by gcongr; exact le_abs_self _
     _ = Tco T x i + (1 / ↑n') * |det₂ (Oside T i) y / det T|  := by
@@ -857,7 +851,7 @@ lemma closed_triangle_is_closed_dir {T : Triangle} (hdet : det T ≠ 0) {x y : �
     _ < Tco T x i + |Tco T x i|/2                             := by gcongr
     _ = Tco T x i + (-Tco T x i)/2                            := by congr; exact abs_of_neg hi
     _ < 0                                                     := by linarith
-  assumption
+  · assumption
 
 /-! ## Basic lemmas about collinearity -/
 
@@ -865,149 +859,149 @@ lemma colin_reverse {u v w : ℝ²} (h : colin u v w) : colin w v u := by
   have ⟨h₁,h₂⟩ := h
   exact ⟨h₁.symm, by rwa [←reverse_segment_open_hull, reverse_segment_to_segment]⟩
 
-
 lemma colin_decomp_closed {u v w :ℝ²} (h :colin u v w ) : closed_hull (to_segment u w)
   = closed_hull (to_segment u v) ∪ closed_hull (to_segment v w) := by
   have hv: v ∈ closed_hull (to_segment u w) := by apply open_sub_closed _ h.2
   have hu: u ∈ closed_hull (to_segment u w) := by apply corner_in_closed_hull (i := 0) (P := to_segment u w)
   ext z
   constructor
-  intro hx
-  simp [closed_segment_interval_im, to_segment, seg_vec] at *
-  rcases hx with ⟨β, hβ, hβz⟩
-  rcases hv with ⟨α, hα, hαv⟩
-  by_cases t : β ≤ α
-  · left
-    by_cases hα0 : α = 0
-    · use 0
-      rw [hα0] at hαv
-      simp only [zero_smul, add_zero] at hαv
-      have t' : β = 0 := by linarith
-      rw [t'] at hβz
-      simp only [zero_smul, add_zero] at hβz
-      simp only [le_refl, zero_le_one, and_self, hβz, zero_smul, add_zero]
-    by_cases hβ0 : β = 0
-    · use 0
-      rw [hβ0] at hβz
-      simp only [zero_smul, add_zero] at hβz
-      simp only [zero_smul, add_zero, zero_le_one, and_self, hβz, le_refl]
-    · use β/α
-      have hα0': α ≠ 0 := hα0
-      have hαpos : 0 < α := by
-        apply lt_of_le_of_ne
-        · exact hα.1
-        · exact hα0'.symm
-      have hβpos : 0 < β := by
-        apply lt_of_le_of_ne
-        · exact hβ.1
-        · exact Ne.symm hβ0
-      constructor
-      · constructor
-        · apply div_nonneg
-          · exact hβ.1
+  · intro hx
+    simp only [closed_segment_interval_im, to_segment, seg_vec, Set.mem_image, Set.mem_Icc,
+      add_eq_left, smul_eq_zero, Set.mem_union] at *
+    rcases hx with ⟨β, hβ, hβz⟩
+    rcases hv with ⟨α, hα, hαv⟩
+    by_cases t : β ≤ α
+    · left
+      by_cases hα0 : α = 0
+      · use 0
+        rw [hα0] at hαv
+        simp only [zero_smul, add_zero] at hαv
+        have t' : β = 0 := by linarith
+        rw [t'] at hβz
+        simp only [zero_smul, add_zero] at hβz
+        simp only [le_refl, zero_le_one, and_self, hβz, zero_smul, add_zero]
+      by_cases hβ0 : β = 0
+      · use 0
+        rw [hβ0] at hβz
+        simp only [zero_smul, add_zero] at hβz
+        simp only [zero_smul, add_zero, zero_le_one, and_self, hβz, le_refl]
+      · use β/α
+        have hα0': α ≠ 0 := hα0
+        have hαpos : 0 < α := by
+          apply lt_of_le_of_ne
           · exact hα.1
-        · rw [div_le_one]
-          · apply t
-          · exact hαpos
-      rw [← hαv]
-      simp only [add_sub_cancel_left]
-      have n: u + (β / α) • α • (w - u) = u + β • (w - u) := by
-        rw [←mul_smul]
-        field_simp
-      rw [n]
-      apply hβz
-  · right
-    have t': α < β := by rw [not_le] at t; exact t
-    by_cases hβ0 : β = 0
-    · by_contra
-      have hα0' : 0 ≤ α := by linarith
-      rw [hβ0] at t'
-      linarith
-    have hαnot1: α ≠ 1 := by
-      by_contra hα1
-      have hβcont: 1 < β :=by
-        rw [hα1] at t'
+          · exact hα0'.symm
+        have hβpos : 0 < β := by
+          apply lt_of_le_of_ne
+          · exact hβ.1
+          · exact Ne.symm hβ0
+        constructor
+        · constructor
+          · apply div_nonneg
+            · exact hβ.1
+            · exact hα.1
+          · rw [div_le_one]
+            · apply t
+            · exact hαpos
+        rw [← hαv]
+        simp only [add_sub_cancel_left]
+        have n: u + (β / α) • α • (w - u) = u + β • (w - u) := by
+          rw [←mul_smul]
+          field_simp
+        rw [n]
+        apply hβz
+    · right
+      have t': α < β := by rw [not_le] at t; exact t
+      by_cases hβ0 : β = 0
+      · by_contra
+        have hα0' : 0 ≤ α := by linarith
+        rw [hβ0] at t'
         linarith
-      have hβcont' : β ≤ 1 := by
-        exact hβ.2
-      linarith
-    · use (β - α) / (1 - α)
-      constructor
-      · constructor
-        · apply div_nonneg
-          · linarith
-          · linarith
-        · rw [div_le_one]
-          · linarith
-          · linarith
-      rw [← hβz, ←hαv]
-      have hβ' : β = (β - β • α)/(1 - α ) := by
-        field_simp
-        have hβ'' : (β - β • α) = β * (1 - α) := by
-          ring_nf
-          simp [HSMul.hSMul, HMul.hMul, SMul.smul, Mul.mul] -- ugly
-        rw [hβ'', mul_comm]
-        have hβ''': (1 - α) * β / (1 - α) = ((1-α)/ (1-α)) * β := by
-          rw [mul_div_assoc]
+      have hαnot1: α ≠ 1 := by
+        by_contra hα1
+        have hβcont: 1 < β :=by
+          rw [hα1] at t'
+          linarith
+        have hβcont' : β ≤ 1 := by
+          exact hβ.2
+        linarith
+      · use (β - α) / (1 - α)
+        constructor
+        · constructor
+          · apply div_nonneg
+            · linarith
+            · linarith
+          · rw [div_le_one]
+            · linarith
+            · linarith
+        rw [← hβz, ←hαv]
+        have hβ' : β = (β - β • α)/(1 - α ) := by
           field_simp
-        have hβ'''': (1 - α) / (1 - α) = 1 := by
-          rw [div_self]
-          linarith
-        rw [hβ''', hβ'''', one_mul]
-      let q := (β - α) / (1 - α)
-      have hq : (β - α) / (1 - α) = q := rfl
-      rw[hq]
-      rw [smul_sub, smul_sub, add_assoc, ← add_sub_assoc, ← add_sub_assoc, ← add_sub_assoc]
-      have hq' : q • (u + α • w - α • u) = q•u + q•α•w - q•α•u := by
-        rw [add_sub_assoc, smul_add, smul_sub, add_sub_assoc]
-      rw [hq']
-      have hr''' : α + q - q * α = β := by
-        rw [← hq]
-        have hra : α + (β - α) / (1 - α) - (β - α) / (1 - α) * α = (1-α)/(1-α) * α + (β - α) / (1 - α) - (β - α) / (1 - α) * α := by
-          rw [div_self]
-          linarith
-          by_contra hcontra
-          have  hcontra' : α = 1 := by
-              linarith
-          linarith
-        rw [hra]
-        ring_nf
-        have hra' : -(α * (1 - α)⁻¹ * β) + (1 - α)⁻¹ * β = (β - β • α) / (1 - α) := by
-          field_simp
+          have hβ'' : (β - β • α) = β * (1 - α) := by
+            ring_nf
+            simp [HSMul.hSMul, HMul.hMul, SMul.smul, Mul.mul] -- ugly
+          rw [hβ'', mul_comm]
+          have hβ''': (1 - α) * β / (1 - α) = ((1-α)/ (1-α)) * β := by
+            rw [mul_div_assoc]
+            field_simp
+          have hβ'''': (1 - α) / (1 - α) = 1 := by
+            rw [div_self]
+            linarith
+          rw [hβ''', hβ'''', one_mul]
+        let q := (β - α) / (1 - α)
+        have hq : (β - α) / (1 - α) = q := rfl
+        rw[hq]
+        rw [smul_sub, smul_sub, add_assoc, ← add_sub_assoc, ← add_sub_assoc, ← add_sub_assoc]
+        have hq' : q • (u + α • w - α • u) = q•u + q•α•w - q•α•u := by
+          rw [add_sub_assoc, smul_add, smul_sub, add_sub_assoc]
+        rw [hq']
+        have hr''' : α + q - q * α = β := by
+          rw [← hq]
+          have hra : α + (β - α) / (1 - α) - (β - α) / (1 - α) * α = (1-α)/(1-α) * α + (β - α) / (1 - α) - (β - α) / (1 - α) * α := by
+            rw [div_self]
+            linarith
+            by_contra hcontra
+            have  hcontra' : α = 1 := by
+                linarith
+            linarith
+          rw [hra]
           ring_nf
-          grind
-        rw [hra']
-        apply hβ'.symm
-      simp [smul_sub, ← hr''']
-      module
-  intro hz
-  by_cases t: z ∈ closed_hull (to_segment u v)
-  have hu': u ∈ closed_hull (to_segment u w):=  by
-    · apply corner_in_closed_hull (i := 0) (P := to_segment u w)
-  have hv': v ∈ closed_hull (to_segment u w):=  by
-    · apply open_sub_closed _ h.2
-  have huvcont: closed_hull (to_segment u v) ⊆ closed_hull (to_segment u w) := by
-    apply closed_hull_convex
-    intro i
-    fin_cases i
-    · exact hu'
-    · exact hv'
-  exact huvcont t
-  have hzcl:  z ∈ closed_hull (to_segment v w) := by
+          have hra' : -(α * (1 - α)⁻¹ * β) + (1 - α)⁻¹ * β = (β - β • α) / (1 - α) := by
+            field_simp
+            ring_nf
+            grind
+          rw [hra']
+          apply hβ'.symm
+        simp [smul_sub, ← hr''']
+        module
+  · intro hz
+    by_cases t: z ∈ closed_hull (to_segment u v)
+    have hu': u ∈ closed_hull (to_segment u w):=  by
+      · apply corner_in_closed_hull (i := 0) (P := to_segment u w)
+    have hv': v ∈ closed_hull (to_segment u w):=  by
+      · apply open_sub_closed _ h.2
+    have huvcont: closed_hull (to_segment u v) ⊆ closed_hull (to_segment u w) := by
+      apply closed_hull_convex
+      intro i
+      fin_cases i
+      · exact hu'
+      · exact hv'
+    exact huvcont t
+    have hzcl:  z ∈ closed_hull (to_segment v w) := by
+      tauto_set
+    have hv'': v ∈ closed_hull (to_segment u w):=  by
+      · apply open_sub_closed _ h.2
+    have hw : w ∈ closed_hull (to_segment u w):=  by
+      · apply corner_in_closed_hull (i := 1) (P := to_segment u w)
+    have hvwcont: closed_hull (to_segment v w) ⊆ closed_hull (to_segment u w) := by
+      apply closed_hull_convex
+      intro i
+      fin_cases i
+      · exact hv''
+      · exact hw
     tauto_set
-  have hv'': v ∈ closed_hull (to_segment u w):=  by
-    · apply open_sub_closed _ h.2
-  have hw : w ∈ closed_hull (to_segment u w):=  by
-    · apply corner_in_closed_hull (i := 1) (P := to_segment u w)
-  have hvwcont: closed_hull (to_segment v w) ⊆ closed_hull (to_segment u w) := by
-    apply closed_hull_convex
-    intro i
-    fin_cases i
-    · exact hv''
-    · exact hw
-  tauto_set
 
-  lemma middle_not_boundary_colin {u v w : ℝ²} (hcolin: colin u v w) : (u ≠ v) ∧ (v ≠ w) := by
+lemma middle_not_boundary_colin {u v w : ℝ²} (hcolin: colin u v w) : (u ≠ v) ∧ (v ≠ w) := by
   have ht : ∀ {u' v' w' : ℝ²}, colin u' v' w' → u' ≠ v' := by
     intro u _ w ⟨h₁, h₂⟩ huv
     refine boundary_not_in_open ?_ h₂
@@ -1018,17 +1012,16 @@ lemma colin_decomp_closed {u v w :ℝ²} (h :colin u v w ) : closed_hull (to_seg
 lemma left_open_hull_in_colin {u v w : ℝ²} {h: colin u v w} :
   open_hull (to_segment u v) ⊆ open_hull (to_segment u w) := by
   apply open_segment_sub'
-  have this := colin_decomp_closed h
-  tauto_set
-  rw [to_segment, to_segment]; exact (middle_not_boundary_colin h).1
+  · have this := colin_decomp_closed h
+    tauto_set
+  · rw [to_segment, to_segment]; exact (middle_not_boundary_colin h).1
 
 lemma right_open_hull_in_colin {u v w : ℝ²} {h : colin u v w}
   : open_hull (to_segment v w) ⊆ open_hull (to_segment u w) := by
   apply open_segment_sub'
-  have this := colin_decomp_closed h
-  tauto_set
-  rw [to_segment, to_segment]; exact (middle_not_boundary_colin h).2
-
+  · have this := colin_decomp_closed h
+    tauto_set
+  · rw [to_segment, to_segment]; exact (middle_not_boundary_colin h).2
 
 lemma interior_left_trans {u v w t : ℝ²}
 (ht : t ∈ open_hull (to_segment u v)) (hv : v ∈ open_hull (to_segment u w)) :
@@ -1044,13 +1037,16 @@ t ∈ open_hull (to_segment u w) := by
       · exact corner_in_closed_hull (i := 0) (P := to_segment u w)
       · exact open_sub_closed _ hv
 
-/-- This definition is meant to help with showing that if u v w, and v w x are colinear, then so are u w x and u v x. In particular this definition gives the simplex that will be used to show that both v w are in the open hull of u x. -/
+/-- This definition is meant to help with showing that if `u v w` and `v w x` are colinear, then
+so are `u w x` and `u v x`. In particular this definition gives the simplex that will be used to
+show that both `v w` are in the open hull of `u x`. -/
 noncomputable def make_new_two_simplex (a b : Fin 2 → ℝ) : (Fin 2 → ℝ)
   | 0 => a 0 / (1 - a 1 * b 0)
   | 1 => a 1 * b 1 / (1 - a 1 * b 0)
 
 /-- This lemma shows that the above defined simplex is indeed a two simplex -/
-lemma make_new_two_simplex_lem (a b : Fin 2 → ℝ)(ha_simplex : a ∈ open_simplex 2)(hb_simplex : b ∈ open_simplex 2): make_new_two_simplex a b ∈ open_simplex 2 := by
+lemma make_new_two_simplex_lem (a b : Fin 2 → ℝ) (ha_simplex : a ∈ open_simplex 2)
+    (hb_simplex : b ∈ open_simplex 2) : make_new_two_simplex a b ∈ open_simplex 2 := by
   have hhelp :=  sub_pos.mpr (mul_lt_one_of_nonneg_of_lt_one_left (le_of_lt (ha_simplex.1 1)) (simplex_co_leq_1_open  (by norm_num) ha_simplex 1) (le_of_lt (simplex_co_leq_1_open (by norm_num) hb_simplex 0)))
   constructor
   · intro i ; fin_cases i
@@ -1066,34 +1062,39 @@ lemma make_new_two_simplex_lem (a b : Fin 2 → ℝ)(ha_simplex : a ∈ open_sim
     exact (add_div (a 0) (a 1 * b 1) (1 - a 1 * b 0)).symm
 
 /-- This lemma shows that indeed v is in the open hull, using the above defined simplex.
-It effectively also shows the same for w, use `two_colin_in_open_hull (colin_reverse h₂) (colin_reverse h₁)`, with `rw[← reverse_segment_to_segment])`. -/
+It effectively also shows the same for w,
+use `two_colin_in_open_hull (colin_reverse h₂) (colin_reverse h₁)`,
+with `rw[← reverse_segment_to_segment])`. -/
 lemma two_colin_in_open_hull {u v w x : ℝ²} (h₁ : colin u v w) (h₂ : colin v w x) : v ∈ open_hull (to_segment u x) := by
-  rcases h₁ with ⟨h_u_neq_w, ⟨ a, ha_simplex, havuw⟩  ⟩
-  rcases h₂ with ⟨h_v_neq_x, ⟨ b, hb_simplex, hbwvx⟩  ⟩
+  rcases h₁ with ⟨h_u_neq_w, ⟨a, ha_simplex, havuw⟩⟩
+  rcases h₂ with ⟨h_v_neq_x, ⟨b, hb_simplex, hbwvx⟩⟩
   simp[ to_segment] at *
   use make_new_two_simplex a b
   constructor
   · exact make_new_two_simplex_lem a b ha_simplex hb_simplex
   · simp[to_segment, make_new_two_simplex]
     rw[← hbwvx] at havuw
-
     have h2 : a 0 • u + (a 1 * b 0) • v + (a 1 * b 1) • x = v
     repeat rw[mul_smul]
     simp at *
     rwa[add_assoc]
-
     have h1: a 0 • u + (a 1 * b 1) • x = (1 - (a 1 * b 0)) • v
     rw[sub_smul, one_smul]
     apply eq_sub_of_add_eq
     nth_rewrite 2[← h2]
     module
-    have h: (1 - a 1 * b 0) > 0 := sub_pos.mpr (mul_lt_one_of_nonneg_of_lt_one_left (le_of_lt (ha_simplex.1 1)) (simplex_co_leq_1_open  (by norm_num) ha_simplex 1) (le_of_lt (simplex_co_leq_1_open (by norm_num) hb_simplex 0)))
+    have h: (1 - a 1 * b 0) > 0 := sub_pos.mpr
+      (mul_lt_one_of_nonneg_of_lt_one_left (le_of_lt (ha_simplex.1 1))
+        (simplex_co_leq_1_open  (by norm_num) ha_simplex 1)
+        (le_of_lt (simplex_co_leq_1_open (by norm_num) hb_simplex 0)))
     rw[← inv_smul_eq_iff₀ (Ne.symm (ne_of_lt h))] at h1
     rw[← h1]
     simp
     module
 
---These two lemmas show that if u v w and v w x then u v x and u w x are also colinear, starting with the latter
+/-! These two lemmas show that if `u v w` and `v w x` then `u v x` and `u w x` are also colinear,
+starting with the latter. -/
+
 lemma colin_trans_right {u v w x : ℝ²} (h₁ : colin u v w) (h₂ : colin v w x) : colin u w x := by
   have hw :=  two_colin_in_open_hull (colin_reverse h₂) (colin_reverse h₁)
   rw[← reverse_segment_to_segment , reverse_segment_open_hull] at hw
@@ -1228,13 +1229,12 @@ by_cases hzw : z = w
     tauto_set
   tauto_set
 
-
 lemma corrollary_closed_in_clopen_right {v z w : ℝ²}
-  (hclop: closed_hull (to_segment z w) ⊆ closed_hull (to_segment v w) \ {v} ): v ∉ closed_hull (to_segment z w) := by
+    (hclop : closed_hull (to_segment z w) ⊆ closed_hull (to_segment v w) \ {v}) :
+    v ∉ closed_hull (to_segment z w) := by
   by_contra h
   have this := hclop h
   simp at this
-
 
 lemma middle_intersection_empty {u v w : ℝ²} {h : colin u v w} :
  closed_hull (to_segment u v) ∩ (closed_hull (to_segment v w) \ {v}) = ∅ := by
@@ -1264,8 +1264,8 @@ have hv1 : v ∈ closed_hull (to_segment z w) := by
   apply hv1'.2
 have hg : closed_hull (to_segment z w) ⊆ closed_hull (to_segment v w) \ {v} := by
   apply closed_in_clopen_right
-  exact (middle_not_boundary_colin h).2
-  apply hzvwv
+  · exact (middle_not_boundary_colin h).2
+  · exact hzvwv
 have hg' : v ∉ closed_hull (to_segment z w) := by
   exact corrollary_closed_in_clopen_right hg
 contradiction
@@ -1284,63 +1284,56 @@ have hvw : open_hull (to_segment v w) ⊆  (closed_hull (to_segment v w) \ {v}) 
   have hnx: x ≠ v := by
     rw [← open_closed_hull_minus_boundary] at hx
     rw [boundary_seg_set] at hx
-    tauto_set
-    exact (middle_not_boundary_colin h).2
+    · tauto_set
+    · exact (middle_not_boundary_colin h).2
   tauto_set
 have hclopen : closed_hull (to_segment u v) ∩ (closed_hull (to_segment v w) \ {v}) = ∅ := by
   apply middle_intersection_empty
   apply h
 tauto_set
 
-
-
-
-
-
-
-lemma clopen_left {u v w : ℝ²}{h: colin u v w} : closed_hull (to_segment u w) \ closed_hull (to_segment u v)
-= closed_hull (to_segment v w) \ {v} := by
+lemma clopen_left {u v w : ℝ²}{h: colin u v w} :
+    closed_hull (to_segment u w) \ closed_hull (to_segment u v)
+    = closed_hull (to_segment v w) \ {v} := by
   ext z
   constructor
-  intro hz
-  have clovw : z ∈ closed_hull (to_segment v w) := by
-    rw [colin_decomp_closed h] at hz
-    tauto_set
-  have hzv : z ≠ v := by
-    intro hzv
-    rw [hzv] at hz
-    have hv : v ∉ closed_hull (to_segment u v) := by
-      rw [closed_segment_interval_im, to_segment, seg_vec] at hz
+  · intro hz
+    have clovw : z ∈ closed_hull (to_segment v w) := by
+      rw [colin_decomp_closed h] at hz
       tauto_set
-    have hv' : v ∈ closed_hull (to_segment u v) := by
-      apply corner_in_closed_hull (i := 1) (P := to_segment u v)
-    tauto_set
-  tauto_set
-  intro hz
-  have hzuw : z ∈ closed_hull (to_segment u w) := by
-    rw [colin_decomp_closed h]
-    tauto_set
-  have hzuv :  z ∉ closed_hull (to_segment u v) := by
-    by_contra hcontra
-    have hmid : closed_hull (to_segment u v) ∩ (closed_hull (to_segment v w) \ {v}) = ∅ := by
-      apply middle_intersection_empty
-      apply h
-    have hzmid: z ∈ closed_hull (to_segment u v) ∩ (closed_hull (to_segment v w) \ {v}) := by
+    have hzv : z ≠ v := by
+      intro hzv
+      rw [hzv] at hz
+      have hv : v ∉ closed_hull (to_segment u v) := by
+        rw [closed_segment_interval_im, to_segment, seg_vec] at hz
+        tauto_set
+      have hv' : v ∈ closed_hull (to_segment u v) := by
+        apply corner_in_closed_hull (i := 1) (P := to_segment u v)
       tauto_set
-    have hempty : Set.singleton z = ∅ := by
-      rw [← hmid]
-      rw [← Set.singleton_subset_iff] at hzmid
+    tauto_set
+  · intro hz
+    have hzuw : z ∈ closed_hull (to_segment u w) := by
+      rw [colin_decomp_closed h]
       tauto_set
-    have hnempty : Set.singleton z ≠ ∅ := by
-      intro hcontra
-      exact Set.notMem_empty z (Set.mem_singleton_iff.mp hcontra ▸ Set.mem_singleton z)
-    contradiction
-  tauto_set
+    have hzuv :  z ∉ closed_hull (to_segment u v) := by
+      by_contra hcontra
+      have hmid : closed_hull (to_segment u v) ∩ (closed_hull (to_segment v w) \ {v}) = ∅ := by
+        apply middle_intersection_empty
+        apply h
+      have hzmid: z ∈ closed_hull (to_segment u v) ∩ (closed_hull (to_segment v w) \ {v}) := by
+        tauto_set
+      have hempty : Set.singleton z = ∅ := by
+        rw [← hmid]
+        rw [← Set.singleton_subset_iff] at hzmid
+        tauto_set
+      have hnempty : Set.singleton z ≠ ∅ := by
+        intro hcontra
+        exact Set.notMem_empty z (Set.mem_singleton_iff.mp hcontra ▸ Set.mem_singleton z)
+      contradiction
+    tauto_set
 
-
-
-
-lemma sub_collinear_right_symm' {u v w t : ℝ²} (hc : colin u v w) (ht : t ∈ closed_hull (to_segment v w))
+lemma sub_collinear_right_symm' {u v w t : ℝ²} (hc : colin u v w)
+    (ht : t ∈ closed_hull (to_segment v w))
     (htv : t ≠ v) : colin u v t := by
   apply colin_reverse
   refine sub_collinear_right' (hc := colin_reverse hc) ?_ htv
@@ -1348,10 +1341,9 @@ lemma sub_collinear_right_symm' {u v w t : ℝ²} (hc : colin u v w) (ht : t ∈
   convert reverse_segment_closed_hull
   simp only [reverse_segment_to_segment]
 
-
-
 lemma colin_sub_aux {u v w x : ℝ²} {L : Segment} (hc : colin u v w)
-    (hLsub : closed_hull L ⊆ closed_hull (to_segment u w)) (hv : v ∉ open_hull L) (hxL : x ∈ open_hull L)
+    (hLsub : closed_hull L ⊆ closed_hull (to_segment u w))
+    (hv : v ∉ open_hull L) (hxL : x ∈ open_hull L)
     (hx : x ∈ closed_hull (to_segment u v)) : closed_hull L ⊆ closed_hull (to_segment u v) := by
   by_cases hL01 : L 0 = L 1
   · rw [←Set.singleton_subset_iff] at hx
@@ -1361,10 +1353,8 @@ lemma colin_sub_aux {u v w x : ℝ²} {L : Segment} (hc : colin u v w)
     have hconstant : closed_hull L = {L 0} := by
       convert closed_hull_constant (Nat.zero_ne_add_one 1).symm using 2
       ext i; fin_cases i <;> simp [hL01]
-    rw [hconstant] at hxcL
-    rw [hconstant]
-    rw [← Set.singleton_subset_iff, Set.singleton_subset_singleton] at hxcL
-    rw [hxcL]
+    rw [hconstant, ← Set.singleton_subset_iff, Set.singleton_subset_singleton] at hxcL
+    rw [hconstant, hxcL]
   · apply closed_hull_convex
     by_contra hLi
     push_neg at hLi
@@ -1381,8 +1371,8 @@ lemma colin_sub_aux {u v w x : ℝ²} {L : Segment} (hc : colin u v w)
             tauto_set
           tauto_set
         rw [clopen_left] at hLivw
-        exact hLivw.1
-        apply hc
+        · exact hLivw.1
+        · exact hc
       · by_contra hcontra
         rw [hcontra] at hLi
         have hvcl : v ∈ closed_hull (to_segment u v) := by
@@ -1395,32 +1385,28 @@ lemma colin_sub_aux {u v w x : ℝ²} {L : Segment} (hc : colin u v w)
         tauto_set
     have hc₂ : colin x v (L i) := by
       apply sub_collinear_right' hc₁ hx
-      intro h;
+      intro h
       rw [h] at hxL
       exact hv hxL
     refine hv (open_segment_sub ?_ ?_ hc₂.2)
     · intro j
       by_cases hj0 : j = 0
-      rw [hj0]
-      rw[to_segment]
-      apply open_sub_closed _ hxL
-      have hj1 : j = 1 := by
-        fin_cases j
-        simp only [Fin.zero_eta, Fin.isValue, not_true_eq_false] at hj0
-        simp only [Fin.mk_one, Fin.isValue]
-      rw [hj1]
-      rw [to_segment]
-      apply boundary_in_closed
-      apply boundary_seg' hL01
+      · rw [hj0, to_segment]
+        apply open_sub_closed _ hxL
+      · have hj1 : j = 1 := by
+          fin_cases j
+          · simp only [Fin.zero_eta, Fin.isValue, not_true_eq_false] at hj0
+          · simp only [Fin.mk_one, Fin.isValue]
+        rw [hj1, to_segment]
+        apply boundary_in_closed
+        apply boundary_seg' hL01
     · rw [to_segment, to_segment]
       by_contra hcontra
       rw [hcontra] at hxL
       apply boundary_not_in_open
-      apply boundary_seg' hL01
-      apply i
-      apply hxL
-
---test
+      · apply boundary_seg' hL01
+        apply i
+      · apply hxL
 
 def ClosedSymSeg : Sym2 ℝ² → Set ℝ² :=
   Sym2.lift ⟨fun a b ↦ closed_hull (to_segment a b), by
@@ -1428,43 +1414,43 @@ def ClosedSymSeg : Sym2 ℝ² → Set ℝ² :=
   convert reverse_segment_closed_hull
   simp only [reverse_segment_to_segment]⟩
 
-
 lemma colin_sub {u v w : ℝ²} (h : colin u v w) {L : Segment}
     (hLsub : closed_hull L ⊆ closed_hull (to_segment u w)) (hLv : v ∉ open_hull L) :
-    closed_hull L ⊆ closed_hull (to_segment u v) ∨ closed_hull L ⊆ closed_hull (to_segment v w) := by
-
-    have hxl : ∃ x, x ∈ open_hull L := by
-     apply open_pol_nonempty
-     linarith
-    have hvw : v ≠ w := by
-      apply (middle_not_boundary_colin h).2
-    rcases hxl with ⟨x, hx⟩
-    by_cases hxl' : x ∈ closed_hull (to_segment u v)
-    constructor
-    · exact (colin_sub_aux h hLsub hLv hx hxl')
-    have hrevwu : closed_hull (to_segment w u) = closed_hull (reverse_segment (to_segment u w)) := by
-      rw [ reverse_segment_to_segment]
-    have hLsubrev : closed_hull L ⊆ closed_hull (to_segment w u) := by
-      rw [hrevwu]
-      rw [reverse_segment_closed_hull]
+    closed_hull L ⊆ closed_hull (to_segment u v)
+    ∨ closed_hull L ⊆ closed_hull (to_segment v w) := by
+  have hxl : ∃ x, x ∈ open_hull L := by
+    apply open_pol_nonempty
+    linarith
+  have hvw : v ≠ w := by
+    apply (middle_not_boundary_colin h).2
+  rcases hxl with ⟨x, hx⟩
+  by_cases hxl' : x ∈ closed_hull (to_segment u v)
+  constructor
+  · exact (colin_sub_aux h hLsub hLv hx hxl')
+  have hrevwu : closed_hull (to_segment w u)
+      = closed_hull (reverse_segment (to_segment u w)) := by
+    rw [ reverse_segment_to_segment]
+  have hLsubrev : closed_hull L ⊆ closed_hull (to_segment w u) := by
+    rw [hrevwu]
+    rw [reverse_segment_closed_hull]
+    apply hLsub
+  have hxl'': x ∈ closed_hull (to_segment v w) := by
+    have hxlaux' : x ∈ closed_hull (to_segment u w) := by
       apply hLsub
-    have hxl'': x ∈ closed_hull (to_segment v w) := by
-       have hxlaux' : x ∈ closed_hull (to_segment u w) := by
-         apply hLsub
-         apply open_sub_closed _ hx
-       have hxlaux: closed_hull (to_segment u w) = closed_hull (to_segment u v) ∪ closed_hull (to_segment v w) := by
-         apply colin_decomp_closed h
-       tauto_set
-    have hxl''rev: x ∈ closed_hull (to_segment w v) := by
-      rw [← reverse_segment_closed_hull]
-      rw [reverse_segment_to_segment]
-      exact hxl''
-    · right
-      have hlrevvw : closed_hull L ⊆ closed_hull (to_segment w v) := by
-        apply colin_sub_aux (colin_reverse h) hLsubrev hLv hx hxl''rev
-      rw [← reverse_segment_to_segment] at hlrevvw
-      rw [reverse_segment_closed_hull] at hlrevvw
-      exact hlrevvw
+      apply open_sub_closed _ hx
+    have hxlaux : closed_hull (to_segment u w)
+        = closed_hull (to_segment u v) ∪ closed_hull (to_segment v w) := colin_decomp_closed h
+    tauto_set
+  have hxl''rev: x ∈ closed_hull (to_segment w v) := by
+    rw [← reverse_segment_closed_hull]
+    rw [reverse_segment_to_segment]
+    exact hxl''
+  · right
+    have hlrevvw : closed_hull L ⊆ closed_hull (to_segment w v) := by
+      apply colin_sub_aux (colin_reverse h) hLsubrev hLv hx hxl''rev
+    rw [← reverse_segment_to_segment] at hlrevvw
+    rw [reverse_segment_closed_hull] at hlrevvw
+    exact hlrevvw
 
 
 
@@ -1510,7 +1496,7 @@ lemma closed_hull_eq_imp_eq_or_rev_seg {u v x y : ℝ²}
   all_goals simp_all [closed_hull_eq_imp_eq_triv (by rfl) h]
 
 lemma closed_hull_eq_imp_eq_or_rev {L₁ L₂ : Segment}
-    (h: closed_hull L₁ = closed_hull L₂) : L₁ = L₂ ∨ L₁ = reverse_segment L₂ := by
+    (h : closed_hull L₁ = closed_hull L₂) : L₁ = L₂ ∨ L₁ = reverse_segment L₂ := by
   rcases closed_hull_eq_imp_eq_or_rev_seg h with (hsame|hrev)
   · left
     ext i j
@@ -1521,12 +1507,12 @@ lemma closed_hull_eq_imp_eq_or_rev {L₁ L₂ : Segment}
 
 
 lemma closed_hull_eq_imp_open_hull_eq {L₁ L₂ : Segment}
-    (h: closed_hull L₁ = closed_hull L₂) : open_hull L₁ = open_hull L₂ := by
+    (h : closed_hull L₁ = closed_hull L₂) : open_hull L₁ = open_hull L₂ := by
   rcases closed_hull_eq_imp_eq_or_rev h with (h|h) <;> rw [h]
   exact reverse_segment_open_hull
 
 lemma closed_hull_eq_imp_boundary_eq {L₁ L₂ : Segment}
-    (h: closed_hull L₁ = closed_hull L₂) : boundary L₁ = boundary L₂ := by
+    (h : closed_hull L₁ = closed_hull L₂) : boundary L₁ = boundary L₂ := by
   rcases closed_hull_eq_imp_eq_or_rev h with (h|h) <;> rw [h]
   exact reverse_segment_boundary
 
@@ -1556,7 +1542,7 @@ lemma seg_par_open_self {L : Segment} :
   open_hull L = line_par (L 0) (seg_vec L) '' (Set.Ioo 0 1 : Set ℝ) := open_segment_interval_im
 
 
-lemma line_par_scalar_Icc {a b t : ℝ} {v₁ v₂ : ℝ²} (ht : 0 < t):
+lemma line_par_scalar_Icc {a b t : ℝ} {v₁ v₂ : ℝ²} (ht : 0 < t) :
     line_par v₁ (t • v₂) '' (Set.Icc a b) = line_par v₁ (v₂) '' (Set.Icc (t * a) (t * b)) := by
   ext x
   rw [Set.mem_image, Set.mem_image]
@@ -1590,13 +1576,14 @@ lemma line_par_neg {a b : ℝ} {v₁ v₂ : ℝ²} :
 
 
 
-lemma line_par_scalar_Icc' {a b t : ℝ} {v₁ v₂ : ℝ²} (ht : t < 0):
+lemma line_par_scalar_Icc' {a b t : ℝ} {v₁ v₂ : ℝ²} (ht : t < 0) :
     line_par v₁ (t • v₂) '' (Set.Icc a b) = line_par v₁ (v₂) '' (Set.Icc (t * b) (t * a)) := by
   have ht : 0 < - t := by linarith
   rw [line_par_neg, ←neg_smul, line_par_scalar_Icc ht, neg_mul_neg, neg_mul_neg]
 
 lemma line_par_trans_Icc {a b t : ℝ} {v₁ v₂ : ℝ²} :
-    line_par (v₁ + t • v₂) (v₂) '' (Set.Icc a b) = line_par v₁ (v₂) '' (Set.Icc (a + t) (b + t)) := by
+    line_par (v₁ + t • v₂) (v₂) '' (Set.Icc a b)
+    = line_par v₁ (v₂) '' (Set.Icc (a + t) (b + t)) := by
   ext x
   rw [Set.mem_image, Set.mem_image]
   constructor
@@ -1692,7 +1679,8 @@ lemma line_par_open {a b : ℝ} {v₁ v₂ : ℝ²} (hab : a < b) :
       · rw [hα0, sub_mul, one_mul, add_comm_sub]
         apply lt_add_of_pos_right
         rwa [sub_pos, mul_lt_mul_iff_right₀ (hα.1 1)]
-      · rwa [hα1, sub_mul, one_mul, ←add_comm_sub, add_lt_iff_neg_right, sub_neg, mul_lt_mul_iff_right₀ (hα.1 0)]
+      · rwa [hα1, sub_mul, one_mul, ←add_comm_sub, add_lt_iff_neg_right, sub_neg,
+          mul_lt_mul_iff_right₀ (hα.1 0)]
     · rw [←hx]
       simp only [line_par, Fin.isValue, hα0, to_segment, Fin.sum_univ_two, smul_add]
       module
@@ -1715,7 +1703,8 @@ lemma seg_par {L₁ L₂ : Segment} (h₁ : L₁ 0 ≠ L₁ 1) (h₂ : closed_hu
     intro hcontra
     rw [hcontra, zero_smul] at ht
     exact h₁ ((seg_vec_zero_iff L₁).mp ht)
-  have ⟨k, hk⟩ := seg_vec_co (x := L₂ 0) (y := L₁ 0) corner_in_closed_hull (h₂ corner_in_closed_hull)
+  have ⟨k, hk⟩ := seg_vec_co (x := L₂ 0) (y := L₁ 0)
+    corner_in_closed_hull (h₂ corner_in_closed_hull)
   by_cases htnonneg : 0 ≤ t
   · have htpos : 0 < t := lt_of_le_of_ne htnonneg htn.symm
     simp_rw [ht, line_par_scalar_Icc htpos, hk, line_par_trans_Icc, closed_segment_interval_im]
@@ -1728,7 +1717,8 @@ lemma seg_par {L₁ L₂ : Segment} (h₁ : L₁ 0 ≠ L₁ 1) (h₂ : closed_hu
       field_simp
       linarith
     rw [h0, h1]
-  · simp_rw [ht, line_par_scalar_Icc' (by linarith), hk, line_par_trans_Icc, closed_segment_interval_im]
+  · simp_rw [ht, line_par_scalar_Icc' (by linarith), hk, line_par_trans_Icc,
+      closed_segment_interval_im]
     use (1-k)/t, (-k)/t
     unfold line_par
     have h0 : (t * (-k / t) + k) = 0 := by
@@ -1763,7 +1753,7 @@ lemma seg_par_nontrivial {L : Segment} {a b : ℝ} {v₁ v₂ : ℝ²} (hL : L 0
   exact hL (hS corner_in_closed_hull corner_in_closed_hull)
 
 
-lemma interval_intersection {a₁ a₂ b₁ b₂: ℝ} (hx₁ : Set.Icc 0 1 ⊆ Set.Icc a₁ b₁)
+lemma interval_intersection {a₁ a₂ b₁ b₂ : ℝ} (hx₁ : Set.Icc 0 1 ⊆ Set.Icc a₁ b₁)
   (hx₂ : Set.Icc 0 1 ⊆ Set.Icc a₂ b₂)
   (ha : a₂ ∉ Set.Ioo a₁ b₁) (hb : b₂ ∉ Set.Ioo a₁ b₁) : Set.Icc a₁ b₁ ⊆ Set.Icc a₂ b₂ := by
   intro y ⟨hyl, hyu⟩
@@ -1778,7 +1768,7 @@ lemma interval_intersection {a₁ a₂ b₁ b₂: ℝ} (hx₁ : Set.Icc 0 1 ⊆ 
     exact hb ⟨by linarith, by linarith⟩
 
 
-lemma seg_sub_seg {L₁ L₂ L₃ : Segment}  (h₁ : L₁ 0 ≠ L₁ 1) (h₂ : closed_hull L₁ ⊆ closed_hull L₂)
+lemma seg_sub_seg {L₁ L₂ L₃ : Segment} (h₁ : L₁ 0 ≠ L₁ 1) (h₂ : closed_hull L₁ ⊆ closed_hull L₂)
     (h₃ : closed_hull L₁ ⊆ closed_hull L₃) (h₂₃ : Disjoint (open_hull L₂) (boundary L₃))
   : closed_hull L₂ ⊆ closed_hull L₃ := by
   have ⟨a₂,b₂, hab₂⟩ := seg_par h₁ h₂
@@ -1805,19 +1795,19 @@ lemma seg_sub_seg {L₁ L₂ L₃ : Segment}  (h₁ : L₁ 0 ≠ L₁ 1) (h₂ :
     simp
 
 
-lemma seg_open_hull_infinite {L: Segment}  (h : L 0 ≠ L 1) :
+lemma seg_open_hull_infinite {L : Segment} (h : L 0 ≠ L 1) :
   Set.Infinite (open_hull L) := by
   rw [open_segment_interval_im]
   refine Set.Infinite.image ?_ (Set.Ioo_infinite (by norm_num))
   intro a ha b hb heq
   rw [seg_vec, add_left_cancel_iff, ←sub_eq_zero, ←sub_smul, smul_eq_zero] at heq
-  cases' heq with this this
+  rcases heq with (this|this)
   · linarith
   · exfalso
     exact h ((seg_vec_zero_iff L).mp this)
 
 
-lemma seg_closed_hull_infinite {L: Segment}  (h : L 0 ≠ L 1) :
+lemma seg_closed_hull_infinite {L : Segment} (h : L 0 ≠ L 1) :
     Set.Infinite (closed_hull L) :=
   Set.Infinite.mono (open_sub_closed L) (seg_open_hull_infinite h)
 
@@ -1891,8 +1881,8 @@ lemma open_sub_closed_sub (S L : Segment) (h : open_hull S ⊆ open_hull L) :
     trans (open_hull L)
     · exact h
     · exact open_sub_closed _
-  · have ⟨x, hx, y, hy, hxy⟩
-      := infinite_imp_two_distinct_el (seg_open_hull_infinite (L := S) (by rwa [←seg_vec_nonzero_iff]))
+  · have ⟨x, hx, y, hy, hxy⟩ := infinite_imp_two_distinct_el
+      (seg_open_hull_infinite (L := S) (by rwa [←seg_vec_nonzero_iff]))
     have hxyS : closed_hull (to_segment x y) ⊆ open_hull S := open_hull_convex hx hy
     refine seg_sub_seg (L₁ := to_segment x y) hxy ?_ ?_ ?_
     · trans (open_hull S)
@@ -1942,7 +1932,7 @@ lemma open_hull_segment_around_non_trivial {x y : ℝ²} {ε₁ ε₂ : ℝ}
 -- More lemmas about the triangle
 
 lemma real_number_bound_aux {n : ℕ} {f g : Fin n → ℝ}
-    (h₁ : ∀ i, 0 < f i) (h₂ : ∀ ε > 0, ∃ i, ε * g i ≤ - f i) : False := by
+    (h₁ : ∀ i, 0 < f i) (h₂ : ∀ ε > 0, ∃ i, ε * g i ≤ -(f i)) : False := by
   revert h₂
   simp only [gt_iff_lt, imp_false, not_forall, not_exists, not_le]
   by_cases hn : n = 0
@@ -2016,7 +2006,7 @@ lemma real_number_bound_aux {n : ℕ} {f g : Fin n → ℝ}
 
 
 
-lemma triangle_open_hull_open {T : Triangle} (hnonDeg : det T ≠ 0) {x: ℝ²}
+lemma triangle_open_hull_open {T : Triangle} (hnonDeg : det T ≠ 0) {x : ℝ²}
     (y : ℝ²)
     (hx : x ∈ open_hull T) : ∃ (ε : ℝ), ε > 0 ∧ x + ε • y ∈ open_hull T := by
   by_contra hcontra
